@@ -18,13 +18,17 @@ const ALL_NOTES: Note[] = [
 const SORT_OPTIONS = ['Newest', 'Oldest', 'A–Z'];
 const FILTER_TAGS = ['All', 'Physics', 'Biology', 'Math', 'History'];
 
-const NotesPage: React.FC = () => {
-  const [filter, setFilter] = useState('All');
+interface NotesPageProps {
+  noteFilter: string;
+  setNoteFilter: (tag: string) => void;
+}
+
+const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter }) => {
   const [sort, setSort] = useState('Newest');
   const [search, setSearch] = useState('');
 
   const filtered = ALL_NOTES
-    .filter(n => filter === 'All' || n.tags.includes(filter))
+    .filter(n => noteFilter === 'All' || n.tags.includes(noteFilter))
     .filter(n => n.title.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
       if (sort === 'A–Z') return a.title.localeCompare(b.title);
@@ -63,15 +67,15 @@ const NotesPage: React.FC = () => {
       </div>
 
       {/* Filter pills */}
-      <div className={styles.filterRow}>
-        {FILTER_TAGS.map(tag => (
+      <div className={styles.filterChips}>
+        {FILTER_TAGS.map(f => (
           <button
-            key={tag}
-            className={`pill-btn ${filter === tag ? 'active' : ''}`}
-            onClick={() => setFilter(tag)}
-            id={`filter-${tag.toLowerCase()}`}
+            key={f}
+            className={`${styles.filterBtn} ${noteFilter === f ? styles.filterActive : ''}`}
+            onClick={() => setNoteFilter(f)}
+            id={`filter-${f.toLowerCase()}`}
           >
-            {tag}
+            {f}
           </button>
         ))}
       </div>
@@ -79,7 +83,13 @@ const NotesPage: React.FC = () => {
       {/* Notes Grid */}
       {filtered.length > 0 ? (
         <div className={styles.grid}>
-          {filtered.map(note => <NoteCard key={note.id} note={note} />)}
+          {filtered.map(note => (
+            <NoteCard 
+              key={note.id} 
+              note={note} 
+              onTagClick={setNoteFilter}
+            />
+          ))}
         </div>
       ) : (
         <div className={styles.emptyState}>

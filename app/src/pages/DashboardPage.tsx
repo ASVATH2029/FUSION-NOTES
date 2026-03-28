@@ -14,7 +14,12 @@ const MOCK_NOTES: Note[] = [
   { id: '6', title: 'Cell Division — Mitosis', excerpt: 'PMAT phases: Prophase, Metaphase, Anaphase, Telophase. Chromosome condensation happens first...', tags: ['Biology'], date: 'Mar 22', author: 'Jason', authorInitial: 'J', color: '#fb923c' },
 ];
 
-const DashboardPage: React.FC = () => (
+interface DashboardProps {
+  onNavigate?: (tab: string) => void;
+  onTagClick?: (tag: string) => void;
+}
+
+const DashboardPage: React.FC<DashboardProps> = ({ onNavigate, onTagClick }) => (
   <div className={styles.page}>
     {/* Header */}
     <div className={styles.header}>
@@ -22,7 +27,7 @@ const DashboardPage: React.FC = () => (
         <h1 className={`${styles.greeting} text-display`}>Good evening, Alex 👋</h1>
         <p className={styles.sub}>You have 3 notes to review and 12 flashcards due today.</p>
       </div>
-      <button className="btn-accent" id="new-note-btn">
+      <button className="btn-accent" id="new-note-btn" onClick={() => onNavigate?.('notes')}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         New Note
       </button>
@@ -41,11 +46,16 @@ const DashboardPage: React.FC = () => (
     {/* Notes Grid */}
     <div className={styles.sectionHeader}>
       <h2 className={`${styles.sectionTitle} text-heading`}>Recent Notes</h2>
-      <button className="btn-ghost" id="view-all-notes-btn">View all</button>
+      <button className="btn-ghost" id="view-all-notes-btn" onClick={() => onNavigate?.('notes')}>View all</button>
     </div>
     <div className={styles.grid}>
       {MOCK_NOTES.map(note => (
-        <NoteCard key={note.id} note={note} />
+        <NoteCard 
+          key={note.id} 
+          note={note} 
+          onClick={() => onNavigate?.('notes')} 
+          onTagClick={onTagClick} 
+        />
       ))}
     </div>
   </div>

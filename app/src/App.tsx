@@ -18,6 +18,7 @@ const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
+  const [noteFilter, setNoteFilter] = useState('All');
 
   const handleSearch = (q: string) => setSearchQuery(q);
   const handleBackFromSearch = () => setSearchQuery(null);
@@ -26,12 +27,18 @@ const App: React.FC = () => {
     setSearchQuery(null);
   };
 
+  const navigateToNotesWithFilter = (tag: string) => {
+    setNoteFilter(tag);
+    setActiveTab('notes');
+    setSearchQuery(null);
+  };
+
   const mainContent = searchQuery ? (
     <SearchResultsView query={searchQuery} onBack={handleBackFromSearch} />
   ) : activeTab === 'dashboard' ? (
-    <DashboardPage />
+    <DashboardPage onNavigate={handleTabChange} onTagClick={navigateToNotesWithFilter} />
   ) : activeTab === 'notes' ? (
-    <NotesPage />
+    <NotesPage noteFilter={noteFilter} setNoteFilter={setNoteFilter} />
   ) : activeTab === 'flashcard' ? (
     <FlashcardsPage />
   ) : (
@@ -58,12 +65,12 @@ const App: React.FC = () => {
         />
         <PageLayout
           main={
-            <div key={searchQuery ? 'search' : activeTab} className="animate-hypr" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div key={searchQuery ? 'search' : activeTab} className="animate-hypr" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
               <div className={styles.mainInner}>{mainContent}</div>
             </div>
           }
           side={
-            <div key={activeTab} className="animate-hypr" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div key={activeTab} className="animate-hypr" style={{ height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
               <div className={styles.sideInner}>{sideContent}</div>
             </div>
           }

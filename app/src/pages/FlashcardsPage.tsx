@@ -34,6 +34,36 @@ const FlashcardsPage: React.FC = () => {
   const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
   const [cardIdx, setCardIdx] = useState(0);
 
+  // Keyboard shortcuts
+  React.useEffect(() => {
+    if (!selectedDeck) return;
+    const handleKey = (e: KeyboardEvent) => {
+      // Space to flip
+      if (e.code === 'Space') {
+        e.preventDefault();
+        const flipEl = document.getElementById(`flipcard-${CARDS[cardIdx % CARDS.length].id}`);
+        if (flipEl) flipEl.click();
+      }
+      // Left/Right to navigate
+      else if (e.key === 'ArrowRight') {
+        if (cardIdx < CARDS.length - 1) setCardIdx(i => i + 1);
+      }
+      else if (e.key === 'ArrowLeft') {
+        if (cardIdx > 0) setCardIdx(i => i - 1);
+      }
+      // 1, 2, 3 for ratings
+      else if (e.key === '1') {
+        document.getElementById('rate-hard')?.click();
+      } else if (e.key === '2') {
+        document.getElementById('rate-ok')?.click();
+      } else if (e.key === '3') {
+        document.getElementById('rate-easy')?.click();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [selectedDeck, cardIdx]);
+
   if (!selectedDeck) {
     return (
       <div className={styles.page}>

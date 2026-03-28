@@ -5,9 +5,10 @@ import styles from './NoteCard.module.css';
 interface NoteCardProps {
   note: Note;
   onClick?: (id: string) => void;
+  onTagClick?: (tag: string) => void;
 }
 
-const NoteCard: React.FC<NoteCardProps> = ({ note, onClick }) => (
+const NoteCard: React.FC<NoteCardProps> = ({ note, onClick, onTagClick }) => (
   <article
     className={styles.card}
     onClick={() => onClick?.(note.id)}
@@ -23,8 +24,17 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onClick }) => (
       <p className={styles.excerpt}>{note.excerpt}</p>
       <div className={styles.footer}>
         <div className={styles.tags}>
-          {note.tags.map(tag => (
-            <span key={tag} className="tag-chip">{tag}</span>
+          {note.tags.map((tag) => (
+            <span 
+              key={tag} 
+              className="tag-chip" 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                onTagClick?.(tag); 
+              }}
+            >
+              {tag}
+            </span>
           ))}
         </div>
         <div className={styles.meta}>
