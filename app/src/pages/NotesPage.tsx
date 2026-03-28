@@ -71,7 +71,7 @@ const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter }) => {
         {FILTER_TAGS.map(f => (
           <button
             key={f}
-            className={`${styles.filterBtn} ${noteFilter === f ? styles.filterActive : ''}`}
+            className={`pill-btn ${noteFilter === f ? 'btn-accent' : ''}`}
             onClick={() => setNoteFilter(f)}
             id={`filter-${f.toLowerCase()}`}
           >

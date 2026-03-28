@@ -61,3 +61,83 @@
   border-color: var(--accent);
   box-shadow: 0 4px 15px var(--accent-glow);
 }
+
+/* ── Floating Panels ── */
+.panelOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: fadeIn var(--duration-base) var(--ease-hypr);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floatingPanel {
+  width: 380px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  color: var(--text-primary);
+  animation: scaleIn var(--duration-base) var(--ease-hypr);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-glass);
+  padding-bottom: 12px;
+}
+
+.panelTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.closeBtn:hover {
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.panelItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.panelItem:hover {
+  background: var(--bg-glass-hover);
+}
+
+.panelItemIcon {
+  color: var(--text-muted);
+}
+.panelItem:hover .panelItemIcon {
+  color: var(--text-primary);
+}
