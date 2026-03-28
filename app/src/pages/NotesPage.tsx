@@ -236,6 +236,15 @@ It represents the journey of the data from creation to disposal, highlighting st
         </button>
       </div>
 
+      <div style={{ position: 'relative', marginBottom: '2rem' }}>
+        {isUploading && (
+          <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(0,0,0,0.5)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: '#fff', fontWeight: 600 }}>Scanning with Gemini Core...</span>
+          </div>
+        )}
+        <UploadDropzone onUpload={handleUpload} />
+      </div>
+
       <div className={styles.filterChips || styles.filterRow}>
         {FILTER_TAGS.map(f => (
           <button
