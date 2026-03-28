@@ -1,6 +1,6 @@
 # 🌌 FusionNotes
 
-Yoo! Welcome to **FusionNotes**! ngl, I spent a crazy amount of time cooking up this UI, and tbh it looks absolutely insane. We didn't just build another note-taking app—we built an aesthetic powerhouse. If you're a fan of those sleek, moody, and ultra-smooth setups (iykyk, heavy Hyprland/Linux visual vibes), you're gonna feel right at home here. It's a massive **W** for anyone who loves high-end UX design combined with heavy utility.
+Yoo! Welcome to **FusionNotes**! ngl, we spent a crazy amount of time cooking up this UI, and tbh it looks absolutely insane. We didn't just build another note-taking app—we built an aesthetic powerhouse. If you're a fan of those sleek, moody, and ultra-smooth setups (iykyk, heavy Hyprland/Linux visual vibes), you're gonna feel right at home here. It's a massive **W** for anyone who loves high-end UX design combined with heavy utility.
 
 ## ✨ The Sauce (UI/UX Features)
 Here is what we packed into this beauty fr:
