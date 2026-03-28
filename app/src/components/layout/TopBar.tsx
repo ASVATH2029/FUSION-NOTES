@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import NavPills from './NavPills';
 import AISearchBar from './AISearchBar';
@@ -24,10 +24,12 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
 
   // Swipe-to-dismiss gesture logic
   const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef<number | null>(null);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     dragStart.current = e.clientX;
+    setIsDragging(true);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -42,6 +44,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
     }
     setDragOffset(0);
     dragStart.current = null;
+    setIsDragging(false);
   };
 
   // Trigger an important notification popup after a short delay to simulate live event
@@ -97,7 +100,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
                     <Bell size={18} className={styles.panelItemIcon} />
                     <div>
                       <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>Jason attached a file</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Biology — Cell Division</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Biology ΓÇö Cell Division</div>
                     </div>
                   </div>
                   <div className={styles.panelItem}>
@@ -155,7 +158,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
         style={{ 
           transform: dragOffset > 0 ? `translateX(${dragOffset}px)` : undefined,
           opacity: dragOffset > 0 ? Math.max(0, 1 - dragOffset / 200) : 1,
-          transition: dragStart.current === null ? 'all var(--duration-fast) var(--ease-out)' : 'none',
+          transition: !isDragging ? 'all var(--duration-fast) var(--ease-out)' : 'none',
           cursor: 'grab' 
         }}
       >
