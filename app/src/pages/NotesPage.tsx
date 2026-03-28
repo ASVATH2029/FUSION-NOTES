@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { Note } from '../types/note';
 import NoteCard from '../components/ui/NoteCard';
 import UploadDropzone from '../components/ui/UploadDropzone';
 import styles from './NotesPage.module.css';
 
-const SORT_OPTIONS = ['Newest', 'Oldest', 'A–Z'];
 const SUBJECTS = ['Physics', 'Biology', 'Math', 'History'];
 const FILTER_TAGS = ['All Subjects', ...SUBJECTS];
 
@@ -15,24 +14,23 @@ interface NotesPageProps {
 }
 
 const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter, token }) => {
-  const [sort, setSort] = useState('Newest');
   const [search, setSearch] = useState('');
   const [uploadSubject, setUploadSubject] = useState('Biology');
   
-  const [notes, setNotes] = useState<any[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [masterNote, setMasterNote] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
-  const [selectedNote, setSelectedNote] = useState<any | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
       
       const rawRes = await fetch(`http://localhost:3000/api/notes`, { headers });
       if (rawRes.ok) {
         const rawData = await rawRes.json();
-        const mappedNotes = rawData.map((dbNote: any) => ({
+        const mappedNotes: Note[] = rawData.map((dbNote: { id: string, group_id: string, extracted_text: string, created_at: string, user_id: string }) => ({
           id: dbNote.id,
           title: dbNote.group_id.charAt(0).toUpperCase() + dbNote.group_id.slice(1) + ' Notes',
           excerpt: dbNote.extracted_text.substring(0, 150) + '...',
@@ -62,11 +60,11 @@ const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter, token 
     } catch (e) {
       console.error("Error fetching notes", e);
     }
-  };
+  }, [noteFilter, token]);
 
   useEffect(() => {
     fetchData();
-  }, [noteFilter, token]);
+  }, [fetchData]);
 
   const handleUpload = async (files: File[]) => {
     if (!files || files.length === 0) return;

@@ -7,4 +7,5 @@ export interface Note {
   author: string;
   authorInitial: string;
   color?: string;
+  fullText?: string;
 }
