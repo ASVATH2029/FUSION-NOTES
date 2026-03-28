@@ -4,6 +4,7 @@ import NoteCard from '../components/ui/NoteCard';
 import UploadDropzone from '../components/ui/UploadDropzone';
 import styles from './NotesPage.module.css';
 
+const SORT_OPTIONS = ['Newest', 'Oldest', 'A–Z'];
 const SUBJECTS = ['Physics', 'Biology', 'Math', 'History'];
 const FILTER_TAGS = ['All Subjects', ...SUBJECTS];
 
@@ -15,7 +16,7 @@ interface NotesPageProps {
 
 const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter, token }) => {
   const [search, setSearch] = useState('');
-  const [uploadSubject, setUploadSubject] = useState('Biology');
+  const [sort, setSort] = useState('Newest');
   
   const [notes, setNotes] = useState<Note[]>([]);
   const [masterNote, setMasterNote] = useState<string | null>(null);
@@ -74,6 +75,11 @@ const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter, token 
 
   const handleUpload = async (files: File[]) => {
     if (!files || files.length === 0) return;
+    if (noteFilter === 'All Subjects') {
+      alert("Please select a specific Subject Filter (e.g., Biology) from the pills before uploading notes!");
+      return;
+    }
+
     setIsUploading(true);
     
     try {
@@ -82,7 +88,7 @@ const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter, token 
       for (const file of files) {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('group_id', uploadSubject.toLowerCase());
+        formData.append('group_id', noteFilter.toLowerCase());
 
         await fetch('http://localhost:3000/api/upload', {
           method: 'POST',
@@ -127,7 +133,11 @@ const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter, token 
   const filtered = notes
     .filter(n => noteFilter === 'All Subjects' || n.tags.includes(noteFilter))
     .filter(n => n.title.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => b.id.localeCompare(a.id));
+    .sort((a, b) => {
+      if (sort === 'Oldest') return new Date(a.date).getTime() - new Date(b.date).getTime();
+      if (sort === 'A–Z') return a.title.localeCompare(b.title);
+      return new Date(b.date).getTime() - new Date(a.date).getTime(); // Default Newest
+    });
 
   if (selectedNote) {
     return (
@@ -174,11 +184,11 @@ const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter, token 
         <select
           className={styles.sortSelect}
           style={{marginLeft: 'auto'}}
-          value={uploadSubject}
-          onChange={e => setUploadSubject(e.target.value)}
-          title="Select Subject for Upload"
+          value={sort}
+          onChange={e => setSort(e.target.value)}
+          title="Sort By"
         >
-          {SUBJECTS.map(o => <option key={o} value={o}>{o} Uploads</option>)}
+          {SORT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
 
         <button className="btn-accent" onClick={() => document.getElementById('upload-dropzone')?.click()} disabled={isUploading}>
