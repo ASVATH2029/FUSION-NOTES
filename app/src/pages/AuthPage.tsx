@@ -10,7 +10,7 @@ export const AuthPage: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
       <div className={styles.authPanel}>
         <div className={styles.logoWrap}>
           <img 
-            src="/logo-transparent.png" 
+            src="/logo-transparent-final.png" 
             alt="FusionNotes" 
             className={styles.logo} 
           />

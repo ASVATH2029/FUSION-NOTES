@@ -11,7 +11,7 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue>({
   theme: 'dark',
   toggleTheme: () => {},
-  logo: '/logo-transparent.png',
+  logo: '/logo-transparent-final.png',
 });
 
 export const useTheme = () => useContext(ThemeContext);
@@ -27,7 +27,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [theme]);
 
   const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
-  const logo = '/logo-transparent.png';
+  const logo = '/logo-transparent-final.png';
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, logo }}>
