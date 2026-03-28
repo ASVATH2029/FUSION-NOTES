@@ -1,0 +1,30 @@
+﻿interactive rebase in progress; onto f657f0f
+Last command done (1 command done):
+   pick ec9a22f feat: complete backend auth, gemini ocr synthesis, subject views, markdown rendering, and new readme
+No commands remaining.
+You are currently rebasing branch 'main' on 'f657f0f'.
+  (fix conflicts and then run "git rebase --continue")
+  (use "git rebase --skip" to skip this patch)
+  (use "git rebase --abort" to check out the original branch)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	modified:   README.md
+	modified:   app/package-lock.json
+	modified:   app/package.json
+	new file:   app/src/components/ui/MermaidChart.tsx
+	modified:   app/src/pages/AuthPage.module.css
+	modified:   app/src/pages/NotesPage.module.css
+	modified:   app/vite.config.ts
+
+Unmerged paths:
+  (use "git restore --staged <file>..." to unstage)
+  (use "git add <file>..." to mark resolution)
+	both modified:   app/src/pages/AuthPage.tsx
+	both modified:   app/src/pages/NotesPage.tsx
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	status.txt
+	status2.txt
+

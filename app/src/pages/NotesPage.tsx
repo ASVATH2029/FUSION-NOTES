@@ -4,9 +4,16 @@ import NoteCard from '../components/ui/NoteCard';
 import UploadDropzone from '../components/ui/UploadDropzone';
 import styles from './NotesPage.module.css';
 
-const SORT_OPTIONS = ['Newest', 'Oldest', 'A–Z'];
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
+import { MermaidChart } from '../components/ui/MermaidChart';
+
 const SUBJECTS = ['Physics', 'Biology', 'Math', 'History'];
-const FILTER_TAGS = ['All Subjects', ...SUBJECTS];
+
+type SortMode = 'newest' | 'oldest' | 'az' | 'za';
 
 interface NotesPageProps {
   noteFilter: string;
@@ -16,192 +23,174 @@ interface NotesPageProps {
 
 const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter, token }) => {
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState('Newest');
-  
+  const [sortMode, setSortMode] = useState<SortMode>('newest');
+
   const [notes, setNotes] = useState<Note[]>([]);
   const [masterNote, setMasterNote] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [masterExpanded, setMasterExpanded] = useState(true);
+  const [statusMsg, setStatusMsg] = useState<{ type: 'info' | 'error' | 'success'; text: string } | null>(null);
+
+  const activeSubject = noteFilter === 'All Subjects' ? null : noteFilter;
 
   const fetchData = useCallback(async () => {
     try {
       const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
-      
-      const rawRes = await fetch(`http://localhost:3000/api/notes`, { headers });
+      const rawRes = await fetch(`/api/notes`, { headers });
       if (rawRes.ok) {
         const rawData = await rawRes.json();
-        const mappedNotes: Note[] = rawData.map((dbNote: { id: string, group_id: string, extracted_text: string, created_at: string, user_id: string }) => ({
+        const mappedNotes: Note[] = rawData.map((dbNote: {
+          id: string; group_id: string; extracted_text: string; created_at: string; user_id: string;
+        }) => ({
           id: dbNote.id,
           title: dbNote.group_id.charAt(0).toUpperCase() + dbNote.group_id.slice(1) + ' Notes',
           excerpt: dbNote.extracted_text.substring(0, 150) + '...',
           fullText: dbNote.extracted_text,
           tags: [dbNote.group_id.charAt(0).toUpperCase() + dbNote.group_id.slice(1)],
-          date: new Date(dbNote.created_at).toLocaleDateString(),
+          date: dbNote.created_at,
           author: dbNote.user_id,
           authorInitial: dbNote.user_id.charAt(0).toUpperCase(),
           color: '#4ade80'
         }));
         setNotes(mappedNotes);
       }
-      
-      const queryFilter = noteFilter === 'All Subjects' ? 'All' : noteFilter;
-      
-      if (queryFilter !== 'All') {
-         const masterRes = await fetch(`http://localhost:3000/api/synthesized/${queryFilter.toLowerCase()}`, { headers });
-         if (masterRes.ok) {
-           const masterData = await masterRes.json();
-           setMasterNote(masterData.master_text);
-         } else {
-           setMasterNote(null);
-         }
+
+      if (activeSubject) {
+        const masterRes = await fetch(`/api/synthesized/${activeSubject.toLowerCase()}`, { headers });
+        if (masterRes.ok) {
+          setMasterNote((await masterRes.json()).master_text);
+        } else {
+          setMasterNote(null);
+        }
       } else {
-         setMasterNote(null);
+        setMasterNote(null);
       }
     } catch (e) {
-      console.warn("Backend unavailable, loading visually rich mock data for UI testing.", e);
-      const fallback = [
-        { 
-          id: '1', 
-          title: 'Information Lifecycle Management', 
-          excerpt: 'It represents the journey of the data from creation to disposal, highlighting stages the data passes through in its lifetime...', 
-          tags: ['Computer Science'], 
-          date: 'Just Now', 
-          author: 'Aditya', 
-          authorInitial: 'A', 
-          fullText: `Information Lifecycle Management:
-
-It represents the journey of the data from creation to disposal, highlighting stages the data passes through in its lifetime. Organizes face the challenges of efficiently managing information throughout its lifecycle.
-
----
-**Lifecycle Diagram:**
-1. Creation -> 2. Storage -> 3. Retrieval -> 4. Usage -> 5. Retirement -> (Cycle repeats)` 
-        }
-      ];
-      setNotes(fallback);
-      localStorage.setItem('fusion_notes', JSON.stringify(fallback));
+      console.error('Error fetching notes', e);
     }
-  }, [noteFilter, token]);
+  }, [noteFilter, token, activeSubject]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleUpload = async (files: File[]) => {
-    if (!files || files.length === 0) return;
-    if (noteFilter === 'All Subjects') {
-      alert("Please select a specific Subject Filter (e.g., Biology) from the pills before uploading notes!");
+    if (!files.length || !activeSubject) return;
+    if (!token) {
+      setStatusMsg({ type: 'error', text: 'You must be signed in with a real account to upload notes.' });
       return;
     }
-
     setIsUploading(true);
-    
+    setStatusMsg({ type: 'info', text: `Uploading ${files.length} file(s) to ${activeSubject} — running Gemini OCR…` });
+    let successCount = 0;
+    let lastError = '';
     try {
-      const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
-      
+      const headers: HeadersInit = { 'Authorization': `Bearer ${token}` };
       for (const file of files) {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('group_id', noteFilter.toLowerCase());
-
-        await fetch('http://localhost:3000/api/upload', {
-          method: 'POST',
-          headers,
-          body: formData,
-        });
+        formData.append('group_id', activeSubject.toLowerCase());
+        const res = await fetch('/api/upload', { method: 'POST', headers, body: formData });
+        if (res.ok) {
+          successCount++;
+        } else {
+          const errData = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+          lastError = errData.detail || `HTTP ${res.status}`;
+          console.error('Upload error:', lastError);
+        }
       }
-      await fetchData(); 
-    } catch (e) {
-      console.warn("Backend unavailable, falling back to simulated frontend offline extraction.", e);
-      // Wait for artificial processing
-      await new Promise(r => setTimeout(r, 1500));
-      
-      const file = files[0];
-      const simulatedScan = {
-        id: `mock_scan_${Date.now()}`,
-        title: file.name.replace(/\.[^/.]+$/, ""),
-        excerpt: `Generated from an offline drag-and-drop ingestion of ${file.name}...`,
-        tags: [noteFilter === 'All Subjects' ? 'Biology' : noteFilter],
-        date: 'Just Now',
-        author: 'Aditya',
-        authorInitial: 'A',
-        fullText: `${file.name} Offline Transcription:\n\nThis note was seamlessly dynamically injected via the frontend UI bypass loop. It represents the extracted data from exactly the file you just dropped in.\n\nYou can now head straight to the Flashcards engine and automatically generate test sets based off of this newly injected drop!`
-      };
-      
-      setNotes(prev => {
-        const nextState = [simulatedScan, ...prev];
-        localStorage.setItem('fusion_notes', JSON.stringify(nextState));
-        return nextState;
-      });
-
+      await fetchData();
+      if (successCount > 0 && !lastError) {
+        setStatusMsg({ type: 'success', text: `✓ ${successCount} note(s) uploaded and OCR complete!` });
+      } else if (lastError) {
+        setStatusMsg({ type: 'error', text: `Upload failed: ${lastError}` });
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setStatusMsg({ type: 'error', text: `Network error: ${msg}` });
     } finally {
       setIsUploading(false);
+      setTimeout(() => setStatusMsg(null), 6000);
     }
   };
 
   const handleSynthesize = async () => {
-    if (noteFilter === 'All Subjects') {
-      alert("Please select a specific Subject Filter (e.g., Biology) before Synthesizing!");
+    if (!activeSubject) return;
+    if (!token) {
+      setStatusMsg({ type: 'error', text: 'You must be signed in to synthesize notes.' });
       return;
     }
-    
     setIsSynthesizing(true);
+    setStatusMsg({ type: 'info', text: `Gemini is synthesizing all ${activeSubject} notes into a master guide…` });
     const formData = new FormData();
-    formData.append('group_id', noteFilter.toLowerCase());
-    
-    const headers: HeadersInit = token ? { 'Authorization': `Bearer ${token}` } : {};
-
+    formData.append('group_id', activeSubject.toLowerCase());
+    const headers: HeadersInit = { 'Authorization': `Bearer ${token}` };
     try {
-      await fetch('http://localhost:3000/api/synthesize', {
-        method: 'POST',
-        headers,
-        body: formData,
-      });
-      await fetchData(); 
-    } catch (e) {
-      console.error("Synthesize failed", e);
+      const res = await fetch('/api/synthesize', { method: 'POST', headers, body: formData });
+      if (res.ok) {
+        await fetchData();
+        setStatusMsg({ type: 'success', text: `✓ ${activeSubject} master guide synthesized!` });
+      } else {
+        const errData = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+        setStatusMsg({ type: 'error', text: `Synthesize failed: ${errData.detail}` });
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setStatusMsg({ type: 'error', text: `Network error: ${msg}` });
     } finally {
       setIsSynthesizing(false);
     }
   };
 
-  const filtered = notes
-    .filter(n => noteFilter === 'All Subjects' || n.tags.includes(noteFilter))
-    .filter(n => n.title.toLowerCase().includes(search.toLowerCase()))
+  // Sort & filter
+  const sortedFiltered = notes
+    .filter(n => !activeSubject || n.tags.includes(activeSubject))
+    .filter(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.excerpt.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
-      if (sort === 'Oldest') return new Date(a.date).getTime() - new Date(b.date).getTime();
-      if (sort === 'A–Z') return a.title.localeCompare(b.title);
-      return new Date(b.date).getTime() - new Date(a.date).getTime(); // Default Newest
+      if (sortMode === 'newest') return new Date(b.date).getTime() - new Date(a.date).getTime();
+      if (sortMode === 'oldest') return new Date(a.date).getTime() - new Date(b.date).getTime();
+      if (sortMode === 'az') return a.title.localeCompare(b.title);
+      if (sortMode === 'za') return b.title.localeCompare(a.title);
+      return 0;
     });
 
+  // ---- Detail view ----
   if (selectedNote) {
     return (
-      <div className={styles.page} style={{ overflowY: 'auto', paddingBottom: '2rem' }}>
-        <button 
-          onClick={() => setSelectedNote(null)} 
-          style={{ background: 'transparent', border: 'none', color: '#a78bfa', cursor: 'pointer', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px' }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <div className={styles.page}>
+        <button onClick={() => setSelectedNote(null)} className={styles.backBtn}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           Back to Notes
         </button>
-        <div style={{ background: '#1e1e2e', padding: '2rem', borderRadius: '12px', border: '1px solid #3b3b54' }}>
-          <h2 style={{ margin: '0 0 1rem 0', color: '#fff' }}>{selectedNote.title}</h2>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem' }}>
+        <div className={styles.detailCard}>
+          <h2 className={styles.detailTitle}>{selectedNote.title}</h2>
+          <div className={styles.detailMeta}>
             {selectedNote.tags.map((t: string) => (
-              <span key={t} style={{ background: '#3b3b54', padding: '4px 12px', borderRadius: '16px', fontSize: '12px', color: '#e2e8f0' }}>{t}</span>
+              <span key={t} className={styles.tag}>{t}</span>
             ))}
-            <span style={{ color: '#94a3b8', fontSize: '12px', alignSelf: 'center', marginLeft: 'auto' }}>Extracted via OCR on {selectedNote.date}</span>
+            <span className={styles.detailDate}>
+              Extracted via OCR · {new Date(selectedNote.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </span>
           </div>
-          <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', color: '#e2e8f0', fontSize: '15px' }}>
-            {selectedNote.fullText}
-          </div>
+          <div className={styles.detailBody}>{selectedNote.fullText}</div>
         </div>
       </div>
     );
   }
 
+  // ---- Main view ----
   return (
-    <div className={styles.page} style={{ overflowY: 'auto', paddingBottom: '2rem' }}>
+    <div className={styles.page}>
+
+      {/* ── Status Banner ── */}
+      {statusMsg && (
+        <div className={`${styles.statusBanner} ${styles[statusMsg.type]}`}>
+          {statusMsg.type === 'info' && <span className={styles.spinner} style={{ width: 14, height: 14, borderWidth: 2 }} />}
+          {statusMsg.text}
+        </div>
+      )}
+
+      {/* ── Top toolbar ── */}
       <div className={styles.toolbar}>
         <div className={styles.searchWrap}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={styles.searchIcon}>
@@ -209,85 +198,157 @@ It represents the journey of the data from creation to disposal, highlighting st
           </svg>
           <input
             className={styles.searchInput}
-            placeholder="Filter notes..."
+            placeholder="Search notes..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             id="notes-search"
           />
         </div>
-        
-        <select
-          className={styles.sortSelect}
-          style={{marginLeft: 'auto'}}
-          value={sort}
-          onChange={e => setSort(e.target.value)}
-          title="Sort By"
-        >
-          {SORT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
 
-        <button className="btn-accent" onClick={() => document.getElementById('upload-dropzone')?.click()} disabled={isUploading}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          {isUploading ? 'Uploading...' : 'Upload'}
-        </button>
-
-        <button className="btn-accent" onClick={handleSynthesize} disabled={isSynthesizing || noteFilter === 'All Subjects'} style={{ opacity: noteFilter === 'All Subjects' ? 0.5 : 1, background: 'linear-gradient(135deg, #a78bfa, #8b5cf6)' }}>
-           {isSynthesizing ? 'Synthesizing...' : '✧ Synthesize Guide'}
-        </button>
-      </div>
-
-      <div style={{ position: 'relative', marginBottom: '2rem' }}>
-        {isUploading && (
-          <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(0,0,0,0.5)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontWeight: 600 }}>Scanning with Gemini Core...</span>
-          </div>
-        )}
-        <UploadDropzone onUpload={handleUpload} />
-      </div>
-
-      <div className={styles.filterChips || styles.filterRow}>
-        {FILTER_TAGS.map(f => (
-          <button
-            key={f}
-            className={`pill-btn ${noteFilter === f || (f === 'All Subjects' && noteFilter === 'All') ? 'btn-accent active' : ''}`}
-            onClick={() => setNoteFilter(f)}
-            id={`filter-${f.toLowerCase().replace(' ', '-')}`}
+        {/* Sort control */}
+        <div className={styles.sortWrap}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg>
+          <select
+            className={styles.sortSelect}
+            value={sortMode}
+            onChange={e => setSortMode(e.target.value as SortMode)}
+            title="Sort notes"
           >
-            {f}
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="az">A → Z</option>
+            <option value="za">Z → A</option>
+          </select>
+        </div>
+      </div>
+
+      {/* ── Subject tabs ── */}
+      <div className={styles.subjectRow}>
+        <button
+          className={`${styles.subjectChip} ${!activeSubject ? styles.subjectChipActive : ''}`}
+          onClick={() => setNoteFilter('All Subjects')}
+        >All</button>
+        {SUBJECTS.map(s => (
+          <button
+            key={s}
+            className={`${styles.subjectChip} ${activeSubject === s ? styles.subjectChipActive : ''}`}
+            onClick={() => setNoteFilter(s)}
+            id={`subject-${s.toLowerCase()}`}
+          >
+            {s}
+            {activeSubject === s && (
+              <span className={styles.subjectBadge}>
+                {notes.filter(n => n.tags.includes(s)).length}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
-      {masterNote && noteFilter !== 'All Subjects' && (
-        <div style={{ background: '#1e1e2e', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid #3b3b54' }}>
-          <h2 style={{ margin: '0 0 1rem 0', color: '#a78bfa', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            Master {noteFilter} Study Guide
-          </h2>
-          <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', color: '#e2e8f0', fontSize: '15px' }}>
-            {masterNote}
+      {/* ── Subject context bar (shown only when a subject is active) ── */}
+      {activeSubject && (
+        <div className={styles.subjectContextBar}>
+          <div className={styles.subjectContextLeft}>
+            <span className={styles.subjectContextTitle}>{activeSubject}</span>
+            <span className={styles.subjectContextCount}>
+              {sortedFiltered.length} note{sortedFiltered.length !== 1 ? 's' : ''}
+              {masterNote ? ' · synthesized ✧' : ''}
+            </span>
+          </div>
+          <div className={styles.subjectContextActions}>
+            <label className={styles.uploadBtn} title={`Upload to ${activeSubject}`}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              {isUploading ? 'Uploading…' : `Upload to ${activeSubject}`}
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                multiple
+                style={{ display: 'none' }}
+                onChange={e => e.target.files && handleUpload(Array.from(e.target.files))}
+                disabled={isUploading}
+              />
+            </label>
+            <button
+              className={styles.synthesizeBtn}
+              onClick={handleSynthesize}
+              disabled={isSynthesizing || sortedFiltered.length === 0}
+              title="Synthesize all notes in this subject into a master guide"
+            >
+              {isSynthesizing
+                ? <><span className={styles.spinner}/> Synthesizing…</>
+                : <>✧ Synthesize Guide</>}
+            </button>
           </div>
         </div>
       )}
 
-      {filtered.length > 0 ? (
+      {/* ── Pinned synthesized note (starred at top) ── */}
+      {masterNote && activeSubject && (
+        <div className={styles.masterCard}>
+          <div className={styles.masterCardHeader} onClick={() => setMasterExpanded(v => !v)}>
+            <div className={styles.masterCardTitle}>
+              <span className={styles.masterStar}>★</span>
+              <span>Master {activeSubject} Study Guide</span>
+              <span className={styles.masterBadge}>AI Synthesized</span>
+            </div>
+            <button className={styles.masterToggle} type="button">
+              {masterExpanded ? '▲' : '▼'}
+            </button>
+          </div>
+          {masterExpanded && (
+            <div className={styles.masterCardBody}>
+              <ReactMarkdown
+                remarkPlugins={[remarkMath, remarkGfm]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                  code({ node, inline, className, children, ...props }: any) {
+                    const match = /language-(\w+)/.exec(className || '');
+                    if (!inline && match && match[1] === 'mermaid') {
+                      return <MermaidChart chart={String(children).replace(/\n$/, '')} />;
+                    }
+                    return (
+                      <code className={className} style={{ background: '#1e1e2e', padding: '2px 4px', borderRadius: '4px', fontSize: '90%' }} {...props}>
+                        {children}
+                      </code>
+                    );
+                  },
+                  h1: ({node, ...props}) => <h1 style={{ marginTop: '1.5em', marginBottom: '0.5em', color: '#fff', fontSize: '1.8em', borderBottom: '1px solid #333', paddingBottom: '0.3em' }} {...props} />,
+                  h2: ({node, ...props}) => <h2 style={{ marginTop: '1.2em', marginBottom: '0.5em', color: '#e2e8f0', fontSize: '1.4em' }} {...props} />,
+                  h3: ({node, ...props}) => <h3 style={{ marginTop: '1em', marginBottom: '0.5em', color: '#cbd5e1', fontSize: '1.1em' }} {...props} />,
+                  p: ({node, ...props}) => <p style={{ marginBottom: '1em', lineHeight: '1.7' }} {...props} />,
+                  ul: ({node, ...props}) => <ul style={{ paddingLeft: '1.5em', marginBottom: '1em' }} {...props} />,
+                  li: ({node, ...props}) => <li style={{ marginBottom: '0.25em' }} {...props} />,
+                  a: ({node, ...props}) => <a style={{ color: '#a78bfa', textDecoration: 'none' }} {...props} />
+                }}
+              >
+                {masterNote}
+              </ReactMarkdown>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Notes grid ── */}
+      {sortedFiltered.length > 0 ? (
         <div className={styles.grid}>
-          {filtered.map(note => (
+          {sortedFiltered.map(note => (
             <div key={note.id} onClick={() => setSelectedNote(note)}>
-              <NoteCard 
-                note={note} 
-                onTagClick={setNoteFilter}
-              />
+              <NoteCard note={note} onTagClick={setNoteFilter} />
             </div>
           ))}
-          <div style={{opacity: isUploading ? 0.5 : 1}}> 
-            <UploadDropzone onUpload={handleUpload} />
-          </div>
         </div>
       ) : (
         <div className={styles.emptyState}>
-          <UploadDropzone onUpload={handleUpload} />
-          {isUploading && <p style={{marginTop: '1rem', color: '#8b5cf6'}}>Uploading and running AI OCR...</p>}
+          {activeSubject ? (
+            <div className={styles.emptySubject}>
+              <div className={styles.emptyIcon}>📂</div>
+              <p className={styles.emptyText}>No notes in <strong>{activeSubject}</strong> yet.</p>
+              <p className={styles.emptyHint}>Upload an image or PDF using the button above — Gemini will extract the text automatically.</p>
+            </div>
+          ) : (
+            <UploadDropzone onUpload={handleUpload} />
+          )}
+          {isUploading && <p className={styles.uploadingText}>Uploading and running AI OCR…</p>}
         </div>
       )}
     </div>
