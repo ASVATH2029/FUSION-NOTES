@@ -15,8 +15,7 @@ const ALL_NOTES: Note[] = [
   { id: '8',  title: 'French Revolution Notes', excerpt: 'Causes, key figures, and outcomes of the 1789 revolution in France...', tags: ['History'], date: 'Mar 20', author: 'Alex', authorInitial: 'A', color: '#f472b6' },
 ];
 
-const SORT_OPTIONS = ['Newest', 'Oldest', 'A–Z'];
-const FILTER_TAGS = ['All', 'Physics', 'Biology', 'Math', 'History'];
+const FILTER_TAGS = ['All Subjects', 'Physics', 'Biology', 'Math', 'History'];
 
 interface NotesPageProps {
   noteFilter: string;
@@ -24,17 +23,12 @@ interface NotesPageProps {
 }
 
 const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter }) => {
-  const [sort, setSort] = useState('Newest');
   const [search, setSearch] = useState('');
 
   const filtered = ALL_NOTES
-    .filter(n => noteFilter === 'All' || n.tags.includes(noteFilter))
+    .filter(n => noteFilter === 'All Subjects' || noteFilter === 'All' || n.tags.includes(noteFilter))
     .filter(n => n.title.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => {
-      if (sort === 'A–Z') return a.title.localeCompare(b.title);
-      if (sort === 'Oldest') return a.id.localeCompare(b.id);
-      return b.id.localeCompare(a.id);
-    });
+    .sort((a, b) => b.id.localeCompare(a.id));
 
   return (
     <div className={styles.page}>
@@ -54,11 +48,11 @@ const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter }) => {
         </div>
         <select
           className={styles.sortSelect}
-          value={sort}
-          onChange={e => setSort(e.target.value)}
-          id="notes-sort"
+          value={noteFilter === 'All' ? 'All Subjects' : noteFilter}
+          onChange={e => setNoteFilter(e.target.value)}
+          id="notes-filter-select"
         >
-          {SORT_OPTIONS.map(o => <option key={o}>{o}</option>)}
+          {FILTER_TAGS.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
         <button className="btn-accent" id="upload-note-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -66,19 +60,6 @@ const NotesPage: React.FC<NotesPageProps> = ({ noteFilter, setNoteFilter }) => {
         </button>
       </div>
 
-      {/* Filter pills */}
-      <div className={styles.filterChips}>
-        {FILTER_TAGS.map(f => (
-          <button
-            key={f}
-            className={`pill-btn ${noteFilter === f ? 'btn-accent' : ''}`}
-            onClick={() => setNoteFilter(f)}
-            id={`filter-${f.toLowerCase()}`}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
 
       {/* Notes Grid */}
       {filtered.length > 0 ? (
