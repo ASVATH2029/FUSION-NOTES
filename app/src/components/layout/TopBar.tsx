@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import NavPills from './NavPills';
 import AISearchBar from './AISearchBar';
 import ThemeToggle from '../ui/ThemeToggle';
-import { Bell, User, Settings, LogOut, X } from 'lucide-react';
+import { Bell, User, Settings, LogOut, X, AlertCircle } from 'lucide-react';
 import styles from './TopBar.module.css';
 
 interface TopBarProps {
@@ -17,6 +17,19 @@ type PanelType = 'notifications' | 'profile' | null;
 const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => {
   const { logo } = useTheme();
   const [activePanel, setActivePanel] = useState<PanelType>(null);
+  
+  // Real-time notification logic
+  const [showToast, setShowToast] = useState(false);
+  const [hasUnread, setHasUnread] = useState(true);
+
+  // Trigger an important notification popup after a short delay to simulate live event
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowToast(true);
+      setHasUnread(true);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
@@ -51,6 +64,13 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
                 </>
               ) : (
                 <>
+                  <div className={styles.panelItem} style={{ background: hasUnread ? 'var(--bg-glass-hover)' : 'transparent' }}>
+                    <AlertCircle size={18} className={styles.panelItemIcon} style={{ color: hasUnread ? '#ef4444' : 'var(--text-muted)' }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>CRITICAL UPDATE</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Emma completely rewrote Kirchhoff's Law.</div>
+                    </div>
+                  </div>
                   <div className={styles.panelItem}>
                     <Bell size={18} className={styles.panelItemIcon} />
                     <div>
@@ -90,14 +110,31 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
 
       <div className={styles.actionsZone}>
         <ThemeToggle />
-        <button className="icon-btn" title="Notifications" onClick={() => setActivePanel('notifications')}>
-          <Bell size={18} />
-        </button>
+        <div className={styles.notifBtnWrap}>
+          <button className="icon-btn" title="Notifications" onClick={() => { setActivePanel('notifications'); setHasUnread(false); }}>
+            <Bell size={18} />
+          </button>
+          {hasUnread && <span className={styles.notifBadge} />}
+        </div>
         <button className={styles.avatar} title="Account" onClick={() => setActivePanel('profile')}>
           <span>A</span>
         </button>
       </div>
     </header>
+
+    {/* Live Toast Popup */}
+    {showToast && (
+      <div className={styles.toastCard}>
+        <AlertCircle size={24} color="#ef4444" style={{ flexShrink: 0, marginTop: 2 }} />
+        <div className={styles.toastContent}>
+          <div className={styles.toastTitle}>Important Sync Change</div>
+          <div className={styles.toastBody}>Emma just completely updated your "Kirchhoff's Law" active note! Review changes.</div>
+        </div>
+        <button className={styles.toastDismiss} onClick={() => setShowToast(false)}>
+          <X size={16} />
+        </button>
+      </div>
+    )}
     </>
   );
 };
