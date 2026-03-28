@@ -31,8 +31,20 @@ const CARDS: Card[] = [
 ];
 
 const FlashcardsPage: React.FC = () => {
+  const [decks, setDecks] = useState<Deck[]>(DECKS);
   const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
   const [cardIdx, setCardIdx] = useState(0);
+
+  const handleCreateDeck = () => {
+    const newDeck: Deck = {
+      id: `d${decks.length + 1}`,
+      title: 'Synthesized from Notes',
+      count: 15,
+      due: 15,
+      color: '#a78bfa' // Theme accent color
+    };
+    setDecks([newDeck, ...decks]);
+  };
 
   // Keyboard shortcuts
   React.useEffect(() => {
@@ -69,10 +81,12 @@ const FlashcardsPage: React.FC = () => {
       <div className={styles.page}>
         <div className={styles.header}>
           <h2 className="text-heading" style={{ fontSize: 18 }}>Your Decks</h2>
-          <button className="btn-accent" id="create-deck-btn">Create Deck</button>
+          <button className="btn-accent" id="create-deck-btn" onClick={handleCreateDeck}>
+            Create Deck
+          </button>
         </div>
         <div className={styles.decksGrid}>
-          {DECKS.map(deck => (
+          {decks.map(deck => (
             <button
               key={deck.id}
               className={styles.deckCard}
@@ -97,7 +111,7 @@ const FlashcardsPage: React.FC = () => {
     );
   }
 
-  const deck = DECKS.find(d => d.id === selectedDeck)!;
+  const deck = decks.find(d => d.id === selectedDeck)!;
   const card = CARDS[cardIdx % CARDS.length];
   const progress = Math.round((cardIdx / CARDS.length) * 100);
 
