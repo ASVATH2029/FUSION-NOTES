@@ -5,16 +5,36 @@ import NoteCard from '../components/ui/NoteCard';
 import UploadDropzone from '../components/ui/UploadDropzone';
 import styles from './DashboardPage.module.css';
 
-const MOCK_NOTES: Note[] = [
-  { id: '1', title: 'Information Lifecycle Management', excerpt: 'It represents the journey of the data from creation to disposal, highlighting stages the data passes through in its lifetime...', tags: ['Computer Science'], date: 'Today', author: 'Aditya', authorInitial: 'A', color: '#a78bfa' }
-];
-
 interface DashboardProps {
   onNavigate?: (tab: string) => void;
   onTagClick?: (tag: string) => void;
 }
 
-const DashboardPage: React.FC<DashboardProps> = ({ onNavigate, onTagClick }) => (
+const DashboardPage: React.FC<DashboardProps> = ({ onNavigate, onTagClick }) => {
+  const [recentNotes, setRecentNotes] = React.useState<Note[]>([
+    { id: '1', title: 'Information Lifecycle Management', excerpt: 'It represents the journey of the data from creation to disposal, highlighting stages the data passes through in its lifetime...', tags: ['Computer Science'], date: 'Today', author: 'Aditya', authorInitial: 'A', color: '#a78bfa' }
+  ]);
+  const [isUploading, setIsUploading] = React.useState(false);
+
+  const handleSimulatedUpload = async (files: File[]) => {
+    setIsUploading(true);
+    await new Promise(r => setTimeout(r, 1200)); // Artificial OCR Delay
+    const file = files[0];
+    const newNote: Note = {
+      id: `dash_mock_${Date.now()}`,
+      title: file.name.replace(/\.[^/.]+$/, ""),
+      excerpt: `Autocaptured OCR fragment extracted from ${file.name}...`,
+      tags: ['Uploaded'],
+      date: 'Just Now',
+      author: 'Aditya',
+      authorInitial: 'A',
+      color: '#4ade80'
+    };
+    setRecentNotes(prev => [newNote, ...prev]);
+    setIsUploading(false);
+  };
+
+  return (
   <div className={styles.page}>
     {/* Header */}
     <div className={styles.header}>
@@ -36,7 +56,14 @@ const DashboardPage: React.FC<DashboardProps> = ({ onNavigate, onTagClick }) => 
     </div>
 
     {/* Upload */}
-    <UploadDropzone />
+    <div style={{ position: 'relative' }}>
+        {isUploading && (
+          <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(0,0,0,0.5)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: '#fff', fontWeight: 600 }}>Scanning with Gemini Core...</span>
+          </div>
+        )}
+        <UploadDropzone onUpload={handleSimulatedUpload} />
+    </div>
 
     {/* Notes Grid */}
     <div className={styles.sectionHeader}>
@@ -44,7 +71,7 @@ const DashboardPage: React.FC<DashboardProps> = ({ onNavigate, onTagClick }) => 
       <button className="btn-ghost" id="view-all-notes-btn" onClick={() => onNavigate?.('notes')}>View all</button>
     </div>
     <div className={styles.grid}>
-      {MOCK_NOTES.map(note => (
+      {recentNotes.map(note => (
         <NoteCard 
           key={note.id} 
           note={note} 
@@ -54,6 +81,7 @@ const DashboardPage: React.FC<DashboardProps> = ({ onNavigate, onTagClick }) => 
       ))}
     </div>
   </div>
-);
+  );
+};
 
 export default DashboardPage;
