@@ -46,4 +46,4 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, onClick, onTagClick }) => (
   </article>
 );
 
-export default NoteCard;
+export default React.memo(NoteCard);

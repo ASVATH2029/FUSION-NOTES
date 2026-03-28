@@ -24,10 +24,12 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
 
   // Swipe-to-dismiss gesture logic
   const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef<number | null>(null);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     dragStart.current = e.clientX;
+    setIsDragging(true);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -42,6 +44,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
     }
     setDragOffset(0);
     dragStart.current = null;
+    setIsDragging(false);
   };
 
   // Trigger an important notification popup after a short delay to simulate live event
@@ -155,7 +158,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
         style={{ 
           transform: dragOffset > 0 ? `translateX(${dragOffset}px)` : undefined,
           opacity: dragOffset > 0 ? Math.max(0, 1 - dragOffset / 200) : 1,
-          transition: dragStart.current === null ? 'all var(--duration-fast) var(--ease-out)' : 'none',
+          transition: !isDragging ? 'all var(--duration-fast) var(--ease-out)' : 'none',
           cursor: 'grab' 
         }}
       >
