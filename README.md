@@ -1,33 +1,33 @@
 # FusionNotes
 
-**Problem Statement:** 
+## Problem Statement
 Students often take unstructured, context-dependent notes during fast-paced lectures, which become difficult to understand over time. This leads to inefficient revision, where learners spend more time re-learning than reinforcing concepts. At the same time, peer learning remains underutilized due to social hesitation, lack of suitable partners, and absence of structured collaboration systems. The disconnect between individual note-taking and collaborative learning results in poor knowledge retention, reduced engagement, and increased academic stress. A unified approach that bridges personal understanding with peer interaction is currently missing.
 
-**The Solution:** 
-FusionNotes is a context-aware collaborative learning platform that unifies individual note-taking with peer interaction. By acting as an intelligent mediator, the system transforms unstructured, context-dependent personal notes into structured, high-retention group resources. Students no longer have to rely on disorganized materials or overcome social hesitation to benefit from peer knowledge; they simply upload their individual notes to a shared subject pool, and the application automatically synthesizes the collective input into a unified, accurate, and easily digestible master study guide.
+## Our Solution
+FusionNotes is our context-aware collaborative learning platform that unifies individual note-taking with peer interaction. We built the system to act as an intelligent mediator, transforming unstructured, context-dependent personal notes into structured, high-retention group resources. Students no longer have to rely on disorganized materials or overcome social hesitation to benefit from peer knowledge; they simply upload their individual notes to a shared subject pool, and our application automatically synthesizes the collective input into a unified, accurate, and easily digestible master study guide.
 
-**RAG System & Context-Aware Intelligence:** 
-At the core of FusionNotes is a Retrieval-Augmented Generation (RAG) system powered by Google Gemini 2.5 Flash and orchestrated via a FastAPI backend. When notes are uploaded (via images or PDFs), an OCR pipeline extracts the raw text. During synthesis, the RAG architecture retrieves relevant concepts from all peer-submitted materials within that subject, cross-references overlapping data, and generates a contextually accurate master guide that fills in individual knowledge gaps without hallucination.
+## RAG System & Context-Aware Intelligence
+At the core of our project is a Retrieval-Augmented Generation (RAG) system powered by Google Gemini 2.5 Flash, which we orchestrated via a FastAPI backend. When notes are uploaded (via images or PDFs), our OCR pipeline extracts the raw text. During synthesis, our RAG architecture retrieves relevant concepts from all peer-submitted materials within that subject, cross-references overlapping data, and generates a contextually accurate master guide that fills in individual knowledge gaps without hallucination.
 
-**High-Fidelity Rendering & Additional Features:** 
-To handle complex subjects, the application utilizes specialized rendering technologies to preserve academic context. It natively processes mathematical formulas using KaTeX for scientific accuracy and generates structured Mermaid flowcharts to visualize biological processes or historical timelines directly within the generated master guide. The platform also provides offline simulation capabilities for continuous UI access and rapid markdown rendering.
+## High-Fidelity Rendering & Additional Features
+To handle complex subjects, we implemented specialized rendering technologies to preserve academic context. We engineered the platform to natively process mathematical formulas using KaTeX for scientific accuracy, and we generate structured Mermaid flowcharts to visualize biological processes or historical timelines directly within the generated master guide. We also provided offline frontend simulation capabilities for continuous UI access and rapid markdown rendering even when disconnected.
 
-**Libraries & Technology Stack:** 
-The solution is built on a scalable, open-source stack. The frontend utilizes React 18, Vite, TypeScript, Lucide React, react-markdown, rehype-katex, and mermaid-js to deliver a responsive UI. The backend uses FastAPI (Python) for rapid orchestration and Google Generative AI SDK for intelligence. Secure user authentication, data management, and row-level security are fully handled by Supabase (managed PostgreSQL).
+## Libraries & Technology Stack
+We developed our solution on a scalable, open-source stack. For our frontend, we utilize React 18, Vite, TypeScript, Lucide React, react-markdown, rehype-katex, and mermaid-js to deliver a highly responsive UI. For our backend, we use FastAPI (Python) for rapid orchestration and the Google Generative AI SDK for intelligence. We fully manage secure user authentication, data management, and row-level access security through Supabase (managed PostgreSQL).
 
-**Testing & Local Setup:** 
-To run and test the full application logic locally:
+## Testing & Local Setup
+To run and test our full application logic locally:
 ```bash
-# 1. Start the FastAPI backend
+# 1. Start our FastAPI backend
 cd hack
 python -m venv venv
 venv\Scripts\activate  # or 'source venv/bin/activate' on Mac/Linux
 pip install -r requirements.txt
 uvicorn main:app --reload --port 3000
 
-# 2. Start the Vite React frontend (in a new terminal split)
+# 2. Start our Vite React frontend (in a new terminal split)
 cd app
 npm install
 npm run dev
 ```
-Once both servers are running, access the frontend at `http://localhost:5173`. The application is configured to proxy requests natively to the backend via port 3000, enabling secure drag-and-drop OCR and Master Guide synthesis generation.
+Once both servers are running, access the frontend at `http://localhost:5173`. We configured the application to proxy requests natively to the backend via port 3000, enabling our secure drag-and-drop OCR and Master Guide synthesis generation.
