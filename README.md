@@ -1,42 +1,120 @@
 # FusionNotes
+### The AI-Powered Collaborative Study Suite
 
-## Problem Statement
-Students often take unstructured, context-dependent notes during fast-paced lectures, which become difficult to understand over time. This leads to inefficient revision, where learners spend more time re-learning than reinforcing concepts. At the same time, peer learning remains underutilized due to social hesitation, lack of suitable partners, and absence of structured collaboration systems. The disconnect between individual note-taking and collaborative learning results in poor knowledge retention, reduced engagement, and increased academic stress. A unified approach that bridges personal understanding with peer interaction is currently missing.
+FusionNotes is a next-generation, aesthetic Progressive Web App (PWA) designed to synchronize fragmented study materials into unified, AI-synthesized master guides. We built it with a focus on high-end user experience and robust real-time collaboration.
 
-## Our Solution
-FusionNotes is our context-aware collaborative learning platform that unifies individual note-taking with peer interaction. We built the system to act as an intelligent mediator, transforming unstructured, context-dependent personal notes into structured, high-retention group resources. Students no longer have to rely on disorganized materials or overcome social hesitation to benefit from peer knowledge; they simply upload their individual notes to a shared subject pool, and our application automatically synthesizes the collective input into a unified, accurate, and easily digestible master study guide.
+---
 
-## RAG System & Context-Aware Intelligence
-At the core of our project is a Retrieval-Augmented Generation (RAG) system powered by Google Gemini 2.5 Flash, which we orchestrated via a FastAPI backend. When notes are uploaded (via images or PDFs), our OCR pipeline extracts the raw text. During synthesis, our RAG architecture retrieves relevant concepts from all peer-submitted materials within that subject, cross-references overlapping data, and generates a contextually accurate master guide that fills in individual knowledge gaps without hallucination.
+## Table of Contents
 
-## High-Fidelity Rendering & Additional Features
-To handle complex subjects, we implemented specialized rendering technologies to preserve academic context. We engineered the platform to natively process mathematical formulas using KaTeX for scientific accuracy, and we generate structured Mermaid flowcharts to visualize biological processes or historical timelines directly within the generated master guide. We also provided offline frontend simulation capabilities for continuous UI access and rapid markdown rendering even when disconnected.
+- [Innovation](#innovation)
+- [Technical Implementation](#technical-implementation)
+- [Feasibility and Scalability](#feasibility-and-scalability)
+- [Core Features](#core-features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
 
-## Libraries & Technology Stack
-We developed our solution on a scalable, open-source stack. To deliver a complete and robust application, we utilize the following core libraries:
+---
 
-- **React 18 & Vite:** For a highly responsive, fast-loading frontend architecture.
-- **TypeScript:** To ensure strict type safety and a robust, maintainable codebase.
-- **FastAPI (Python):** For rapid backend API orchestration and efficient file handling.
-- **Google Generative AI SDK:** To power our RAG system, enabling Gemini 2.5 Flash for OCR and synthesis.
-- **Supabase:** To fully manage our PostgreSQL database, secure JWT user authentication, and row-level security.
-- **react-markdown & rehype-katex:** To natively render complex academic Markdown and mathematical LaTeX formulas.
-- **mermaid-js:** To dynamically draw structured flowcharts and diagrams directly within the master guide.
-- **Lucide React:** For beautifully consistent, lightweight scalar vector icons.
+## Innovation
 
-## Testing & Local Setup
-To run and test our full application logic locally:
-```bash
-# 1. Start our FastAPI backend
-cd hack
-python -m venv venv
-venv\Scripts\activate  # or 'source venv/bin/activate' on Mac/Linux
-pip install -r requirements.txt
-uvicorn main:app --reload --port 3000
+Our Gemini-powered synthesis goes beyond simple OCR. FusionNotes uses Google Gemini (1.5 Pro) to synthesize heterogeneous inputs — handwritten notes, textbook snippets, and flowcharts — into a coherent Master Study Guide. The system also features multi-modal intelligence that automatically detects and renders LaTeX equations and Mermaid.js diagrams from simple image uploads or text snippets. We also designed an aesthetic, high-utility interface inspired by high-end Linux customizations, featuring 16px blur glassmorphism and over-damped spring animations for a snappy, premium feel.
 
-# 2. Start our Vite React frontend (in a new terminal split)
-cd app
-npm install
-npm run dev
-```
-Once both servers are running, access the frontend at `http://localhost:5173`. We configured the application to proxy requests natively to the backend via port 3000, enabling our secure drag-and-drop OCR and Master Guide synthesis generation.
+---
+
+## Technical Implementation
+
+We built a high-performance FastAPI backend designed for low-latency AI processing. For collaboration, we use Supabase (Postgres/RLS) to power instant multi-user synchronization, activity streams, and live profile tracking. FusionNotes is also a fully offline-capable Progressive Web App with service worker caching and cross-device responsiveness. On top of that, we implemented custom OCR logic to handle tables and flowcharts, ensuring parity between raw study data and the final synthesized output.
+
+---
+
+## Feasibility and Scalability
+
+We leveraged Supabase for infinite horizontal scaling and Google's GenAI for efficient, high-volume data distillation, giving FusionNotes an enterprise-grade backbone. The application directly addresses the problem of fragmented knowledge in student groups, merging separate study habits into a single, high-fidelity knowledge base. We have fully purged the system of mock data, with live user synchronization in place, making it ready for immediate campus deployment.
+
+---
+
+## Core Features
+
+- **Live Collaborators** — Track your study group's activity and status in real time.
+- **Multilingual Support** — Fully localized in English, Hindi, Malayalam, Tamil, and Telugu.
+- **Keyboard-Driven Study** — Navigate flashcards and search with optimized shortcut keys.
+- **Glassmorphism UI** — Premium visual experience with custom-designed abstract backdrops.
+
+---
+
+## Tech Stack
+
+All libraries and frameworks used in FusionNotes are open-source and entirely free to use, with no paid licenses or proprietary dependencies.
+
+| Library / Framework | Category | License |
+|---|---|---|
+| React 19 | Frontend UI Framework | Open-Source (MIT) |
+| Vite | Frontend Build Tool | Open-Source (MIT) |
+| TypeScript | Programming Language | Open-Source (Apache 2.0) |
+| Lucide Icons | Icon Library | Open-Source (ISC) |
+| i18next | Internationalization | Open-Source (MIT) |
+| FastAPI | Backend Web Framework | Open-Source (MIT) |
+| Python 3.11+ | Backend Language | Open-Source (PSF) |
+| Google GenAI SDK | AI Integration Library | Open-Source (Apache 2.0) |
+| Supabase Client | Database / Auth Client | Open-Source (MIT) |
+| PostgreSQL | Relational Database | Open-Source (PostgreSQL License) |
+| Mermaid.js | Diagram Rendering | Open-Source (MIT) |
+| Rehype-KaTeX | LaTeX Math Rendering | Open-Source (MIT) |
+| React-Markdown | Markdown Rendering | Open-Source (MIT) |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- Python 3.11+
+- A Supabase project
+- A Google Gemini API key
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/fusionnotes.git
+   cd fusionnotes
+   ```
+
+2. **Install frontend dependencies**
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+3. **Install backend dependencies**
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
+
+4. **Configure environment variables**
+   ```bash
+   # Frontend (.env)
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+   # Backend (.env)
+   GEMINI_API_KEY=your_gemini_api_key
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_SERVICE_KEY=your_supabase_service_key
+   ```
+
+5. **Run the development servers**
+   ```bash
+   # Frontend
+   npm run dev
+
+   # Backend
+   uvicorn main:app --reload
+   ```
+
+---
+
+*Created with care for students who value both aesthetics and efficiency.*
