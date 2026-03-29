@@ -9,3 +9,20 @@
 **High-Fidelity Rendering & Additional Features:** To handle complex subjects, the application utilizes specialized rendering technologies to preserve academic context. It natively processes mathematical formulas using KaTeX for scientific accuracy and generates structured Mermaid flowcharts to visualize biological processes or historical timelines directly within the generated master guide. The platform also provides offline simulation capabilities for continuous UI access and rapid markdown rendering.
 
 **Libraries & Technology Stack:** The solution is built on a scalable, open-source stack. The frontend utilizes React 18, Vite, TypeScript, Lucide React, react-markdown, rehype-katex, and mermaid-js to deliver a responsive UI. The backend uses FastAPI (Python) for rapid orchestration and Google Generative AI SDK for intelligence. Secure user authentication, data management, and row-level security are fully handled by Supabase (managed PostgreSQL).
+
+**Testing & Local Setup:** 
+To run and test the full application logic locally:
+```bash
+# 1. Start the FastAPI backend
+cd hack
+python -m venv venv
+venv\Scripts\activate  # or 'source venv/bin/activate' on Mac/Linux
+pip install -r requirements.txt
+uvicorn main:app --reload --port 3000
+
+# 2. Start the Vite React frontend (in a new terminal split)
+cd app
+npm install
+npm run dev
+```
+Once both servers are running, access the frontend at `http://localhost:5173`. The application is configured to proxy requests natively to the backend via port 3000, enabling secure drag-and-drop OCR and Master Guide synthesis generation.
