@@ -158,6 +158,125 @@ async def login_user(user: UserLogin):
         raise HTTPException(status_code=401, detail=f"Login failed: {str(e)}")
 
 
+# ---- AI & Study Enhancement Endpoints ----
+
+class ChatMessage(BaseModel):
+    role: str
+    text: str
+
+class ChatRequest(BaseModel):
+    message: str
+    history: list[ChatMessage] = []
+
+@app.post("/api/chat")
+async def chat_with_ai(request: ChatRequest, current_user = Depends(get_current_user)):
+    """
+    Processes a chat message using Gemini 1.5 Pro, aware of the user's study context.
+    """
+    if not gemini_client:
+        raise HTTPException(status_code=500, detail="Gemini API not configured")
+
+    try:
+        # Build history for Gemini
+        contents = []
+        for msg in request.history:
+            contents.append({
+                "role": "user" if msg.role == "user" else "model",
+                "parts": [{"text": msg.text}]
+            })
+        
+        # Add current message
+        contents.append({
+            "role": "user",
+            "parts": [{"text": request.message}]
+        })
+
+        system_instruction = """
+        You are 'Fusion Assistant', a high-end AI study partner for the FusionNotes app.
+        Your tone is professional, encouraging, and highly efficient.
+        You have access to the user's study materials (though for this specific request, just act as a general tutor).
+        If the user asks about their notes, tell them you can help explain or summarize anything they've uploaded.
+        Keep responses concise and formatted with Markdown. Use LaTeX for math and Mermaid for diagrams if helpful.
+        """
+
+        response = gemini_client.models.generate_content(
+            model='gemini-2.0-flash', # Using 2.0 Flash for low latency and high quality
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.7
+            )
+        )
+
+        return {
+            "status": "success",
+            "reply": response.text,
+            "role": "ai"
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/flashcards/generate")
+async def generate_flashcards(
+    group_id: str = Form(...),
+    current_user = Depends(get_current_user)
+):
+    """
+    Generates high-quality flashcards (JSON) from a group's synthesized notes.
+    """
+    if not supabase or not gemini_client:
+        raise HTTPException(status_code=500, detail="Missing API keys")
+
+    try:
+        # Fetch synthesized notes first, fallback to raw notes
+        note_data = supabase_admin.table("synthesized_notes").select("master_text").eq("group_id", group_id).order("created_at", desc=True).limit(1).execute().data
+        
+        if not note_data:
+            # Fallback to combined raw notes
+            raw_data = supabase_admin.table("raw_notes").select("extracted_text").eq("group_id", group_id).execute().data
+            if not raw_data:
+                raise HTTPException(status_code=404, detail="No notes found for this subject. Upload some first!")
+            source_text = "\n\n".join([n['extracted_text'] for n in raw_data])
+        else:
+            source_text = note_data[0]['master_text']
+
+        prompt = f"""
+        You are an expert educator. Extract 5-10 high-quality study flashcards from the text below.
+        Each flashcard MUST have a clear, concise 'question' and a direct 'answer'.
+        
+        Return ONLY a JSON array of objects with the keys "question" and "answer". 
+        Do not include any other text or markdown formatting (like ```json).
+        
+        TEXT:
+        {source_text}
+        """
+
+        response = gemini_client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=prompt
+        )
+        
+        # Clean potential markdown from response
+        res_text = response.text.strip()
+        if res_text.startswith("```json"):
+            res_text = res_text.split("```json")[-1].split("```")[0].strip()
+        elif res_text.startswith("```"):
+            res_text = res_text.split("```")[-1].split("```")[0].strip()
+
+        import json
+        cards = json.loads(res_text)
+        
+        return {
+            "status": "success",
+            "cards": cards
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to generate flashcards: {str(e)}")
+
+
 # ---- Core Application Endpoints ----
 
 @app.get("/health")
@@ -319,6 +438,7 @@ async def get_collaborators():
             })
             
             collaborators.append({
+                "id": uid,
                 "user_id": p['username'] or uid,
                 "initial": (p['username'] or "S")[0].upper(),
                 "last_subject": activity['last_subject'],

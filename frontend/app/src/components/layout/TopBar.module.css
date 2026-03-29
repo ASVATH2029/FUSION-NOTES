@@ -1,0 +1,223 @@
+﻿.topbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px 28px 10px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.logoZone {
+  display: flex;
+  align-items: center;
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+
+.logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  user-select: none;
+}
+
+.centerZone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.actionsZone {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 4px;
+  flex-shrink: 0;
+}
+
+.notifBtnWrap {
+  position: relative;
+  display: flex;
+}
+
+.notifBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  background: #ef4444; /* Alert Red */
+  border-radius: 50%;
+  border: 2px solid var(--bg-base);
+  animation: pulseBadge 2s infinite;
+}
+
+@keyframes pulseBadge {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  color: var(--text-inverse);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid var(--border-glass);
+  transition: all var(--duration-base) var(--ease-hypr);
+}
+
+.avatar:hover {
+  transform: scale(1.12) translateY(-1px);
+  border-color: var(--accent);
+  box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+/* ΓöÇΓöÇ Floating Panels ΓöÇΓöÇ */
+.panelOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: fadeIn var(--duration-base) var(--ease-hypr);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floatingPanel {
+  width: 380px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  color: var(--text-primary);
+  animation: scaleIn var(--duration-base) var(--ease-hypr);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-glass);
+  padding-bottom: 12px;
+}
+
+.panelTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.closeBtn:hover {
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.panelItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.panelItem:hover {
+  background: var(--bg-glass-hover);
+}
+
+.panelItemIcon {
+  color: var(--text-muted);
+}
+.panelItem:hover .panelItemIcon {
+  color: var(--text-primary);
+}
+
+/* ΓöÇΓöÇ Toast Notification ΓöÇΓöÇ */
+.toastCard {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 340px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  z-index: 9999;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  animation: slideToast var(--duration-base) var(--ease-hypr);
+}
+
+.toastDismiss {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-top: -2px;
+  margin-right: -4px;
+  padding: 4px;
+  display: flex;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+.toastDismiss:hover {
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.toastContent {
+  flex: 1;
+}
+
+.toastTitle {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.toastBody {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+@keyframes slideToast {
+  0% { transform: scale(0.9) translateY(40px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
