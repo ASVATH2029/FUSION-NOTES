@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Note } from '../types/note';
 import NoteCard from '../components/ui/NoteCard';
 import UploadDropzone from '../components/ui/UploadDropzone';
@@ -33,6 +34,7 @@ const NotesPage: React.FC<NotesPageProps> = ({
   noteFilter, setNoteFilter, token, notes, onUpload, isUploading, 
   statusMsg, setStatusMsg, selectedNoteId, setSelectedNoteId, fetchNotes 
 }) => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('newest');
 
@@ -128,16 +130,16 @@ const NotesPage: React.FC<NotesPageProps> = ({
       <div className={styles.page}>
         <button onClick={() => { setSelectedNote(null); setSelectedNoteId(null); }} className={styles.backBtn}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Back to Notes
+          {t('notes.backToNotes')}
         </button>
         <div className={styles.detailCard}>
           <h2 className={styles.detailTitle}>{selectedNote.title}</h2>
           <div className={styles.detailMeta}>
-            {selectedNote.tags.map((t: string) => (
-              <span key={t} className={styles.tag}>{t}</span>
+            {selectedNote.tags.map((tag: string) => (
+              <span key={tag} className={styles.tag}>{tag}</span>
             ))}
             <span className={styles.detailDate}>
-              Extracted via OCR · {new Date(selectedNote.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              {t('notes.extractedViaOCR')} · {new Date(selectedNote.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
           </div>
           <div className={styles.detailBody}>{selectedNote.fullText}</div>
@@ -166,7 +168,7 @@ const NotesPage: React.FC<NotesPageProps> = ({
           </svg>
           <input
             className={styles.searchInput}
-            placeholder="Search notes..."
+            placeholder={t('notes.searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             id="notes-search"
@@ -182,10 +184,10 @@ const NotesPage: React.FC<NotesPageProps> = ({
             onChange={e => setSortMode(e.target.value as SortMode)}
             title="Sort notes"
           >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="az">A → Z</option>
-            <option value="za">Z → A</option>
+            <option value="newest">{t('notes.newestFirst')}</option>
+            <option value="oldest">{t('notes.oldestFirst')}</option>
+            <option value="az">{t('notes.aToZ')}</option>
+            <option value="za">{t('notes.zToA')}</option>
           </select>
         </div>
       </div>
@@ -226,7 +228,7 @@ const NotesPage: React.FC<NotesPageProps> = ({
           <div className={styles.subjectContextActions}>
             <label className={styles.uploadBtn} title={`Upload to ${activeSubject}`}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              {isUploading ? 'Uploading…' : `Upload to ${activeSubject}`}
+              {isUploading ? t('notes.uploading') : `${t('notes.uploadTo')} ${activeSubject}`}
               <input
                 type="file"
                 accept="image/*,application/pdf"
@@ -243,8 +245,8 @@ const NotesPage: React.FC<NotesPageProps> = ({
               title="Synthesize all notes in this subject into a master guide"
             >
               {isSynthesizing
-                ? <><span className={styles.spinner}/> Synthesizing…</>
-                : <>✧ Synthesize Guide</>}
+                ? <><span className={styles.spinner}/> {t('notes.synthesizing')}</>
+                : <>✧ {t('notes.synthesizeGuide')}</>}
             </button>
           </div>
         </div>
@@ -257,7 +259,7 @@ const NotesPage: React.FC<NotesPageProps> = ({
             <div className={styles.masterCardTitle}>
               <span className={styles.masterStar}>★</span>
               <span>Master {activeSubject} Study Guide</span>
-              <span className={styles.masterBadge}>AI Synthesized</span>
+              <span className={styles.masterBadge}>{t('notes.aiSynthesized')}</span>
             </div>
             <div className={styles.masterHeaderActions}>
               <button
@@ -267,7 +269,7 @@ const NotesPage: React.FC<NotesPageProps> = ({
                 onClick={e => { e.stopPropagation(); setMasterModalOpen(true); }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                Open Fully
+                {t('notes.openFully')}
               </button>
               <button className={styles.masterToggle} type="button">
                 {masterExpanded ? '▲' : '▼'}
@@ -367,13 +369,13 @@ const NotesPage: React.FC<NotesPageProps> = ({
           {activeSubject ? (
             <div className={styles.emptySubject}>
               <div className={styles.emptyIcon}>📂</div>
-              <p className={styles.emptyText}>No notes in <strong>{activeSubject}</strong> yet.</p>
-              <p className={styles.emptyHint}>Upload an image or PDF using the button above — Gemini will extract the text automatically.</p>
+              <p className={styles.emptyText}>{t('notes.noNotesIn')} <strong>{activeSubject}</strong> {t('notes.yet')}</p>
+              <p className={styles.emptyHint}>{t('notes.uploadHint')}</p>
             </div>
           ) : (
             <UploadDropzone onUpload={handleUpload} />
           )}
-          {isUploading && <p className={styles.uploadingText}>Uploading and running AI OCR…</p>}
+          {isUploading && <p className={styles.uploadingText}>{t('notes.uploadingOCR')}</p>}
         </div>
       )}
     </div>

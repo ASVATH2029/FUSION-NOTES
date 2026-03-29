@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './AuthPage.module.css';
 import AnimatedBackground from '../components/AnimatedBackground';
 import { LogIn, UserPlus, User, Mail, Loader } from 'lucide-react';
@@ -6,6 +7,7 @@ import { LogIn, UserPlus, User, Mail, Loader } from 'lucide-react';
 type Mode = 'login' | 'register';
 
 export const AuthPage: React.FC<{ onLogin: (token: string) => void }> = ({ onLogin }) => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>('login');
 
   // Login fields
@@ -101,38 +103,38 @@ export const AuthPage: React.FC<{ onLogin: (token: string) => void }> = ({ onLog
               onClick={() => switchMode('login')}
               type="button"
             >
-              Sign In
+              {t('auth.signIn')}
             </button>
             <button
               className={`${styles.modeTab} ${mode === 'register' ? styles.modeTabActive : ''}`}
               onClick={() => switchMode('register')}
               type="button"
             >
-              Register
+              {t('auth.register')}
             </button>
           </div>
 
           {mode === 'login' ? (
             <>
-              <h1 className={styles.title}>Welcome back.</h1>
-              <p className={styles.subtitle}>Log in to access your intelligent workspace.</p>
+              <h1 className={styles.title}>{t('auth.welcomeBack')}</h1>
+              <p className={styles.subtitle}>{t('auth.loginSubtitle')}</p>
 
               <div className={styles.providers}>
                 <button className={`${styles.btnProvider} pill-btn`} onClick={() => onLogin('mock-github-jwt')}>
                   <User size={20} />
-                  Continue with GitHub
+                  {t('auth.continueGithub')}
                 </button>
                 <button className={`${styles.btnProvider} pill-btn`} onClick={() => onLogin('mock-email-jwt')}>
                   <Mail size={20} />
-                  Continue with Email
+                  {t('auth.continueEmail')}
                 </button>
               </div>
 
-              <div className={styles.divider}><span>Or</span></div>
+              <div className={styles.divider}><span>{t('auth.or')}</span></div>
 
               <form className={styles.loginForm} onSubmit={handleLogin}>
                 <div className={styles.inputGroup}>
-                  <label>Email</label>
+                  <label>{t('auth.email')}</label>
                   <input
                     type="email"
                     placeholder="alex@example.com"
@@ -143,7 +145,7 @@ export const AuthPage: React.FC<{ onLogin: (token: string) => void }> = ({ onLog
                   />
                 </div>
                 <div className={styles.inputGroup}>
-                  <label>Password</label>
+                  <label>{t('auth.password')}</label>
                   <input
                     type="password"
                     placeholder="••••••••"
@@ -156,23 +158,23 @@ export const AuthPage: React.FC<{ onLogin: (token: string) => void }> = ({ onLog
                 {errorMsg && <div style={{ color: '#ef4444', fontSize: '12px', marginTop: '-4px' }}>{errorMsg}</div>}
                 <button className={`pill-btn btn-accent ${styles.loginBtn}`} type="submit" disabled={isLoading}>
                   {isLoading ? <Loader size={18} className="spin" /> : <LogIn size={18} />}
-                  {isLoading ? 'Verifying...' : 'Sign in securely'}
+                  {isLoading ? t('auth.verifying') : t('auth.signInSecurely')}
                 </button>
               </form>
 
               <p className={styles.footerText}>
-                Don't have an account?{' '}
-                <a href="#" onClick={e => { e.preventDefault(); switchMode('register'); }}>Register</a>
+                {t('auth.noAccount')}{' '}
+                <a href="#" onClick={e => { e.preventDefault(); switchMode('register'); }}>{t('auth.register')}</a>
               </p>
             </>
           ) : (
             <>
-              <h1 className={styles.title}>Create account.</h1>
-              <p className={styles.subtitle}>Join FusionNotes and start collaborating.</p>
+              <h1 className={styles.title}>{t('auth.createAccount')}</h1>
+              <p className={styles.subtitle}>{t('auth.joinSubtitle')}</p>
 
               <form className={styles.loginForm} onSubmit={handleRegister}>
                 <div className={styles.inputGroup}>
-                  <label>Username</label>
+                  <label>{t('auth.username')}</label>
                   <input
                     type="text"
                     placeholder="alex.student"
@@ -183,7 +185,7 @@ export const AuthPage: React.FC<{ onLogin: (token: string) => void }> = ({ onLog
                   />
                 </div>
                 <div className={styles.inputGroup}>
-                  <label>Email</label>
+                  <label>{t('auth.email')}</label>
                   <input
                     type="email"
                     placeholder="alex@example.com"
@@ -194,7 +196,7 @@ export const AuthPage: React.FC<{ onLogin: (token: string) => void }> = ({ onLog
                   />
                 </div>
                 <div className={styles.inputGroup}>
-                  <label>Password</label>
+                  <label>{t('auth.password')}</label>
                   <input
                     type="password"
                     placeholder="••••••••"
@@ -205,7 +207,7 @@ export const AuthPage: React.FC<{ onLogin: (token: string) => void }> = ({ onLog
                   />
                 </div>
                 <div className={styles.inputGroup}>
-                  <label>Confirm Password</label>
+                  <label>{t('auth.confirmPassword')}</label>
                   <input
                     type="password"
                     placeholder="••••••••"
@@ -219,13 +221,13 @@ export const AuthPage: React.FC<{ onLogin: (token: string) => void }> = ({ onLog
                 {successMsg && <div style={{ color: '#22c55e', fontSize: '12px', marginTop: '-4px' }}>{successMsg}</div>}
                 <button className={`pill-btn btn-accent ${styles.loginBtn}`} type="submit" disabled={isLoading}>
                   {isLoading ? <Loader size={18} className="spin" /> : <UserPlus size={18} />}
-                  {isLoading ? 'Creating account...' : 'Create account'}
+                  {isLoading ? t('auth.creatingAccount') : t('auth.createAccountBtn')}
                 </button>
               </form>
 
               <p className={styles.footerText}>
-                Already have an account?{' '}
-                <a href="#" onClick={e => { e.preventDefault(); switchMode('login'); }}>Sign in</a>
+                {t('auth.haveAccount')}{' '}
+                <a href="#" onClick={e => { e.preventDefault(); switchMode('login'); }}>{t('auth.signIn')}</a>
               </p>
             </>
           )}

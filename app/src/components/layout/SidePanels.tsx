@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './SidePanels.module.css';
 
 /* ── DASHBOARD SIDE ── */
@@ -52,12 +53,13 @@ function useCollaborators() {
 
 export const DashboardSide: React.FC = () => {
   const { collabs, loading } = useCollaborators();
+  const { t } = useTranslation();
 
   return (
     <div className={styles.panel}>
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
-          <span className={styles.sectionTitle}>Activity</span>
+          <span className={styles.sectionTitle}>{t('side.activity')}</span>
         </div>
         <div className={styles.activityList}>
           {ACTIVITY.map(a => (
@@ -78,21 +80,21 @@ export const DashboardSide: React.FC = () => {
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
           <span className={styles.sectionTitle}>
-            Collaborators
+            {t('side.collaborators')}
             {!loading && collabs.length > 0 && (
               <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 6, fontWeight: 400 }}>
-                ({collabs.length} active)
+                ({collabs.length} {t('side.active')})
               </span>
             )}
           </span>
-          <button className="btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} id="invite-btn">Invite</button>
+          <button className="btn-ghost" style={{ padding: '3px 10px', fontSize: 12 }} id="invite-btn">{t('side.invite')}</button>
         </div>
         <div className={styles.collabList}>
           {loading && (
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }}>Loading…</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }}>{t('side.loading')}</div>
           )}
           {!loading && collabs.length === 0 && (
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }}>No collaborators yet. Upload notes to connect!</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }}>{t('side.noCollabs')}</div>
           )}
           {collabs.map((c, i) => (
             <div key={c.user_id} className={styles.collabItem} id={`collab-${i}`}>
@@ -110,7 +112,7 @@ export const DashboardSide: React.FC = () => {
                   {c.last_subject}
                 </span>
               </div>
-              <span className={`${styles.status} ${styles.online}`}>Online</span>
+              <span className={`${styles.status} ${styles.online}`}>{t('side.online')}</span>
             </div>
           ))}
         </div>
@@ -120,60 +122,65 @@ export const DashboardSide: React.FC = () => {
 };
 
 /* ── FLASHCARD SIDE ── */
-export const FlashcardSide: React.FC = () => (
-  <div className={styles.panel}>
-    <div className={styles.section}>
-      <div className={styles.sectionTitle} style={{ marginBottom: 14 }}>Today's Progress</div>
-      <div className={styles.statsGrid}>
-        {[
-          { label: 'Cards Done', value: '28', color: '#4ade80' },
-          { label: 'Streak', value: '7d', color: '#facc15' },
-          { label: 'Accuracy', value: '84%', color: '#8b7fff' },
-          { label: 'Due Today', value: '12', color: '#f87171' },
-        ].map(s => (
-          <div key={s.label} className={styles.miniStat}>
-            <span className={styles.miniStatValue} style={{ color: s.color }}>{s.value}</span>
-            <span className={styles.miniStatLabel}>{s.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    <div className={styles.divider} />
-
-    <div className={styles.section}>
-      <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>Keyboard Shortcuts</div>
-      <div className={styles.shortcuts}>
-        {[
-          { key: 'Space', action: 'Flip card' },
-          { key: '→', action: 'Next card' },
-          { key: '←', action: 'Previous' },
-          { key: '1', action: 'Hard' },
-          { key: '2', action: 'Okay' },
-          { key: '3', action: 'Easy' },
-        ].map(s => (
-          <div key={s.key} className={styles.shortcut}>
-            <kbd className={styles.kbd}>{s.key}</kbd>
-            <span className={styles.action}>{s.action}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
-
-/* ── CHAT SIDE ── */
-export const ChatSide: React.FC = () => {
-  const { collabs, loading } = useCollaborators();
+export const FlashcardSide: React.FC = () => {
+  const { t } = useTranslation();
 
   return (
     <div className={styles.panel}>
       <div className={styles.section}>
-        <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>Study Group — Physics</div>
+        <div className={styles.sectionTitle} style={{ marginBottom: 14 }}>{t('side.todayProgress')}</div>
+        <div className={styles.statsGrid}>
+          {[
+            { label: t('side.cardsDone'), value: '28', color: '#4ade80' },
+            { label: t('side.streak'), value: '7d', color: '#facc15' },
+            { label: t('side.accuracy'), value: '84%', color: '#8b7fff' },
+            { label: t('side.dueToday'), value: '12', color: '#f87171' },
+          ].map(s => (
+            <div key={s.label} className={styles.miniStat}>
+              <span className={styles.miniStatValue} style={{ color: s.color }}>{s.value}</span>
+              <span className={styles.miniStatLabel}>{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.divider} />
+
+      <div className={styles.section}>
+        <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>{t('side.keyboardShortcuts')}</div>
+        <div className={styles.shortcuts}>
+          {[
+            { key: 'Space', action: t('side.flipCard') },
+            { key: '→', action: t('side.nextCard') },
+            { key: '←', action: t('side.previous') },
+            { key: '1', action: t('flashcards.hard') },
+            { key: '2', action: t('flashcards.okay') },
+            { key: '3', action: t('flashcards.easy') },
+          ].map(s => (
+            <div key={s.key} className={styles.shortcut}>
+              <kbd className={styles.kbd}>{s.key}</kbd>
+              <span className={styles.action}>{s.action}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── CHAT SIDE ── */
+export const ChatSide: React.FC = () => {
+  const { collabs, loading } = useCollaborators();
+  const { t } = useTranslation();
+
+  return (
+    <div className={styles.panel}>
+      <div className={styles.section}>
+        <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>{t('side.studyGroup')}</div>
         <div className={styles.collabList}>
-          {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Loading…</div>}
+          {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('side.loading')}</div>}
           {!loading && collabs.length === 0 && (
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>No members yet.</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('side.noMembers')}</div>
           )}
           {collabs.map((c, i) => (
             <div key={c.user_id} className={styles.collabItem}>
@@ -184,14 +191,14 @@ export const ChatSide: React.FC = () => {
                 <div className={styles.onlineDot} />
               </div>
               <span className={styles.collabName}>{c.user_id.substring(0, 8)}…</span>
-              <span className={`${styles.status} ${styles.online}`}>Online</span>
+              <span className={`${styles.status} ${styles.online}`}>{t('side.online')}</span>
             </div>
           ))}
         </div>
       </div>
       <div className={styles.divider} />
       <div className={styles.section}>
-        <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>Shared Notes</div>
+        <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>{t('side.sharedNotes')}</div>
         {['Circuit Theory Notes', 'Biology Overview', 'WW2 Timeline'].map((n, i) => (
           <div key={i} className={styles.sharedNote}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -206,17 +213,18 @@ export const ChatSide: React.FC = () => {
 /* ── NOTES SIDE ── */
 export const NotesSide: React.FC = () => {
   const { collabs } = useCollaborators();
+  const { t } = useTranslation();
 
   return (
     <div className={styles.panel}>
       <div className={styles.section}>
-        <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>Quick Stats</div>
+        <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>{t('side.quickStats')}</div>
         <div className={styles.statsGrid}>
           {[
-            { label: 'Collaborators', value: String(collabs.length || '—'), color: '#8b7fff' },
-            { label: 'Subjects', value: '4', color: '#4ade80' },
-            { label: 'Shared', value: 'All', color: '#facc15' },
-            { label: 'AI Synth', value: '✓', color: '#38bdf8' },
+            { label: t('side.collaborators'), value: String(collabs.length || '—'), color: '#8b7fff' },
+            { label: t('side.subjects'), value: '4', color: '#4ade80' },
+            { label: t('side.shared'), value: 'All', color: '#facc15' },
+            { label: t('side.aiSynth'), value: '✓', color: '#38bdf8' },
           ].map(s => (
             <div key={s.label} className={styles.miniStat}>
               <span className={styles.miniStatValue} style={{ color: s.color }}>{s.value}</span>
@@ -227,13 +235,14 @@ export const NotesSide: React.FC = () => {
       </div>
       <div className={styles.divider} />
       <div className={styles.section}>
-        <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>Recent Tags</div>
+        <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>{t('side.recentTags')}</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {['Physics', 'Biology', 'Circuits', 'Math', 'WWII', 'Calculus', 'Thermodynamics'].map(t => (
-            <span key={t} className="tag-chip">{t}</span>
+          {['Physics', 'Biology', 'Circuits', 'Math', 'WWII', 'Calculus', 'Thermodynamics'].map(tag => (
+            <span key={tag} className="tag-chip">{tag}</span>
           ))}
         </div>
       </div>
     </div>
   );
 };
+

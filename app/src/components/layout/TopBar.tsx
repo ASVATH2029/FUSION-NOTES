@@ -1,8 +1,10 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import NavPills from './NavPills';
 import AISearchBar from './AISearchBar';
 import ThemeToggle from '../ui/ThemeToggle';
+import LanguageSelector from '../ui/LanguageSelector';
 import { Bell, User, Settings, LogOut, X, AlertCircle } from 'lucide-react';
 import styles from './TopBar.module.css';
 
@@ -16,6 +18,7 @@ type PanelType = 'notifications' | 'profile' | null;
 
 const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => {
   const { logo } = useTheme();
+  const { t } = useTranslation();
   const [activePanel, setActivePanel] = useState<PanelType>(null);
   
   // Real-time notification logic
@@ -64,7 +67,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
           <div className={styles.floatingPanel} onClick={e => e.stopPropagation()}>
             <div className={styles.panelHeader}>
               <h3 className={styles.panelTitle}>
-                {activePanel === 'profile' ? 'Account Settings' : 'Notifications'}
+                {activePanel === 'profile' ? t('topbar.accountSettings') : t('topbar.notifications')}
               </h3>
               <button className={styles.closeBtn} onClick={() => setActivePanel(null)}>
                 <X size={20} />
@@ -80,11 +83,11 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
                   </div>
                   <div className={styles.panelItem}>
                     <Settings size={18} className={styles.panelItemIcon} />
-                    <span>Preferences</span>
+                    <span>{t('topbar.preferences')}</span>
                   </div>
                   <div className={styles.panelItem} style={{ color: 'var(--accent)' }}>
                     <LogOut size={18} className={styles.panelItemIcon} />
-                    <span>Sign out</span>
+                    <span>{t('topbar.signOut')}</span>
                   </div>
                 </>
               ) : (
@@ -92,7 +95,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
                   <div className={styles.panelItem} style={{ background: hasUnread ? 'var(--bg-glass-hover)' : 'transparent' }}>
                     <AlertCircle size={18} className={styles.panelItemIcon} style={{ color: hasUnread ? '#ef4444' : 'var(--text-muted)' }} />
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>CRITICAL UPDATE</div>
+                      <div style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{t('topbar.criticalUpdate')}</div>
                       <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Emma completely rewrote Kirchhoff's Law.</div>
                     </div>
                   </div>
@@ -134,14 +137,15 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
       </div>
 
       <div className={styles.actionsZone}>
+        <LanguageSelector />
         <ThemeToggle />
         <div className={styles.notifBtnWrap}>
-          <button className="icon-btn" title="Notifications" onClick={() => { setActivePanel('notifications'); setHasUnread(false); }}>
+          <button className="icon-btn" title={t('topbar.notifications')} onClick={() => { setActivePanel('notifications'); setHasUnread(false); }}>
             <Bell size={18} />
           </button>
           {hasUnread && <span className={styles.notifBadge} />}
         </div>
-        <button className={styles.avatar} title="Account" onClick={() => setActivePanel('profile')}>
+        <button className={styles.avatar} title={t('topbar.accountSettings')} onClick={() => setActivePanel('profile')}>
           <span>A</span>
         </button>
       </div>
@@ -164,7 +168,7 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange, onSearch }) => 
       >
         <AlertCircle size={24} color="#ef4444" style={{ flexShrink: 0, marginTop: 2 }} />
         <div className={styles.toastContent}>
-          <div className={styles.toastTitle}>Important Sync Change</div>
+          <div className={styles.toastTitle}>{t('topbar.importantSync')}</div>
           <div className={styles.toastBody}>Emma just completely updated your "Kirchhoff's Law" active note! Review changes.</div>
         </div>
         <button className={styles.toastDismiss} onClick={() => setShowToast(false)}>
