@@ -4,3 +4,4 @@ supabase
 google-genai
 python-dotenv
 python-multipart
+gunicorn
