@@ -93,7 +93,7 @@ const FlashcardsPage: React.FC<FlashcardsPageProps> = ({ token, notes }) => {
     }
   };
 
-  const handleDirectDeckUpload = async (files: File[]) => {
+  const handleDirectDeckUpload = async (_files: File[]) => {
     // This is still a fallback but we could also pipe this to the backend
     setIsUploading(true);
     // ... (rest of the direct upload logic remains similar or we could upgrade it later)
