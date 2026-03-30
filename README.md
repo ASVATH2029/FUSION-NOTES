@@ -1,46 +1,11 @@
-<<<<<<< HEAD
-# 🌌 FusionNotes: The AI-Powered Collaborative Study Suite
 
-FusionNotes is a next-generation, aesthetic Progressive Web App (PWA) designed to synchronize fragmented study materials into unified, AI-synthesized master guides. Built with a focus on high-end UX and robust real-time collaboration.
-
-## 🚀 Innovation (20%) - *How we changed the game*
-*   **Gemini-Powered Synthesis:** Beyond simple OCR, FusionNotes uses Google Gemini (1.5 Pro) to synthesize heterogeneous inputs—handwritten notes, textbook snippets, and flowcharts—into a coherent Master Study Guide.
-*   **Multi-Modal Intelligence:** Automatically detects and renders LaTeX equations and Mermaid.js diagrams from simple image uploads or text snippets.
-*   **Aesthetic High-Utility UI:** A unique design system inspired by high-end Linux customizations, featuring 16px blur glassmorphism and over-damped spring animations for a snappy, premium feel.
-
-## 🛠️ Technical Implementation (30%) - *The Depth of Execution*
-*   **Server Architecture:** High-performance **FastAPI** backend designed for low-latency AI processing.
-*   **Real-Time Collaborative Engine:** Uses **Supabase** (Postgres/RLS) for instant multi-user synchronization, activity streams, and live profile tracking.
-*   **Advanced PWA Logic:** Fully offline-capable Progressive Web App with service worker caching and cross-device responsiveness.
-*   **Heterogeneous OCR:** Implemented custom logic to handle tables and flowcharts, ensuring parity between raw study data and the final synthesized output.
-
-## 📈 Feasibility & Scalability (20%) - *Real-world Impact*
-*   **Enterprise-Grade Backend:** Leverages Supabase for infinite horizontal scaling and Google's GenAI for efficient, high-volume data distillation.
-*   **Practical Utility:** Directly addresses the problem of fragmented knowledge in student groups, merging separate study habits into a single, high-fidelity knowledge base.
-*   **Production State:** Fully purged of mock data with live user synchronization, making it ready for immediate campus deployment.
-
-## ✨ Core Features
-- **Live Collaborators:** Track your study group's activity and status in real-time.
-- **Multilingual Support:** Fully localized in English, Hindi, Malayalam, Tamil, and Telugu.
-- **Keyboard-Driven Study:** Navigate flashcards and search with optimized shortcut keys.
-- **Glassmorphism UI:** Premium visual experience with custom-designed abstract backdrops.
-
-## 🛠️ Tech Stack
-- **Frontend:** React 19, Vite, TypeScript, Lucide Icons, i18next
-- **Backend:** FastAPI (Python 3.11+), Google GenAI (Gemini 1.5 Pro)
-- **Database/Auth:** Supabase (PostgreSQL, JWT Auth)
-- **Rendering:** Mermaid.js, Rehype-Katex, React-Markdown
-
----
-*Created with ❤️ for students who crave both aesthetic and efficiency.*
-=======
 <img src="app/public/darklogo.png" width="240" alt="FusionNotes Logo" />
 
 
 DEMONSTRATION LINK: https://drive.google.com/drive/folders/1hvLkbhq6KRPkW2lDH4f2UZ5izQP9CEzL?usp=sharing
 
 
-WEBSITE LINK:https://idyllic-uncompensated-ozie.ngrok-free.dev/   OR  https://tinyurl.com/fusionnotes
+WEBSITE LINK:https://fusion-notes.netlify.app/
 
 ### The AI-Powered Collaborative Study Suite
 
