@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styles from './AuthPage.module.css';
 import AnimatedBackground from '../components/AnimatedBackground';
 import { LogIn, UserPlus, User, Mail, Loader } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 type Mode = 'login' | 'register';
 
@@ -36,7 +37,7 @@ export const AuthPage: React.FC<{ onLogin: (token: string, user: any) => void }>
     setIsLoading(true);
     setErrorMsg('');
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: loginEmail, password: loginPassword })
@@ -69,7 +70,7 @@ export const AuthPage: React.FC<{ onLogin: (token: string, user: any) => void }>
     setErrorMsg('');
     setSuccessMsg('');
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: regUsername, email: regEmail, password: regPassword })

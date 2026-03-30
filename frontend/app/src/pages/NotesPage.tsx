@@ -11,6 +11,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { MermaidChart } from '../components/ui/MermaidChart';
+import { API_BASE_URL } from '../config';
 
 const StudyGuideRenderer: React.FC<{ content: string }> = ({ content }) => {
   // Scrub potential markdown code block wrappers if Gemini included them
@@ -89,7 +90,7 @@ const NotesPage: React.FC<NotesPageProps> = ({
       const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
 
       if (activeSubject) {
-        const masterRes = await fetch(`/api/synthesized/${activeSubject.toLowerCase()}`, { headers });
+        const masterRes = await fetch(`${API_BASE_URL}/api/synthesized/${activeSubject.toLowerCase()}`, { headers });
         if (masterRes.ok) {
           setMasterNote((await masterRes.json()).master_text);
         } else {
@@ -133,7 +134,7 @@ const NotesPage: React.FC<NotesPageProps> = ({
     formData.append('group_id', activeSubject.toLowerCase());
     const headers: HeadersInit = { 'Authorization': `Bearer ${token}` };
     try {
-      const res = await fetch('/api/synthesize', { method: 'POST', headers, body: formData });
+      const res = await fetch(`${API_BASE_URL}/api/synthesize`, { method: 'POST', headers, body: formData });
       if (res.ok) {
         await fetchNotes();
         await fetchData();

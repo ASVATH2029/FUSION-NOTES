@@ -3,6 +3,7 @@ import FlipCard from '../components/ui/FlipCard';
 import UploadDropzone from '../components/ui/UploadDropzone';
 import { Trash2 } from 'lucide-react';
 import styles from './FlashcardsPage.module.css';
+import { API_BASE_URL } from '../config';
 
 import type { Note } from '../types/note';
 
@@ -56,7 +57,7 @@ const FlashcardsPage: React.FC<FlashcardsPageProps> = ({ token, notes }) => {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('/api/flashcards/generate', {
+      const res = await fetch(`${API_BASE_URL}/api/flashcards/generate`, {
         method: 'POST',
         headers,
         body: formData

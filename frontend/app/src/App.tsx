@@ -14,6 +14,7 @@ import ChatPage from './pages/ChatPage';
 import SearchResultsView from './pages/SearchResultsView';
 import { AuthPage } from './pages/AuthPage';
 import styles from './App.module.css';
+import { API_BASE_URL } from './config';
 
 type Tab = 'dashboard' | 'notes' | 'flashcard' | 'chat';
 
@@ -35,7 +36,7 @@ const App: React.FC = () => {
 
   const fetchCollabs = useCallback(async () => {
     try {
-      const res = await fetch('/api/collaborators');
+      const res = await fetch(`${API_BASE_URL}/api/collaborators`);
       if (res.ok) {
         const data = await res.json();
         setCollabs(data);
@@ -62,7 +63,7 @@ const App: React.FC = () => {
   const fetchNotes = useCallback(async () => {
     try {
       const headers: Record<string, string> = jwtToken ? { 'Authorization': `Bearer ${jwtToken}` } : {};
-      const res = await fetch(`/api/notes`, { headers });
+      const res = await fetch(`${API_BASE_URL}/api/notes`, { headers });
       if (res.ok) {
         const rawData = await res.json();
         const mappedNotes: Note[] = rawData.map((dbNote: any) => ({
@@ -106,7 +107,7 @@ const App: React.FC = () => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('group_id', subject.toLowerCase());
-        await fetch('/api/upload', { method: 'POST', headers, body: formData });
+        await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', headers, body: formData });
       }
       await fetchNotes();
       await fetchCollabs(); // Refresh collabs to show activity
