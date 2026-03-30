@@ -79,9 +79,8 @@ const NotesPage: React.FC<NotesPageProps> = ({
 
   const [masterNote, setMasterNote] = useState<string | null>(null);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [isViewingMaster, setIsViewingMaster] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
-  const [masterExpanded, setMasterExpanded] = useState(true);
-  const [masterModalOpen, setMasterModalOpen] = useState(false);
 
   const activeSubject = noteFilter === 'All Subjects' ? null : noteFilter;
 
@@ -139,6 +138,7 @@ const NotesPage: React.FC<NotesPageProps> = ({
         await fetchNotes();
         await fetchData();
         setStatusMsg({ type: 'success', text: `✓ ${activeSubject} master guide synthesized!` });
+        setIsViewingMaster(true); // Automatically open the "form" (detailed view)
       } else {
         const errData = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
         setStatusMsg({ type: 'error', text: `Synthesize failed: ${errData.detail}` });
@@ -162,6 +162,30 @@ const NotesPage: React.FC<NotesPageProps> = ({
       if (sortMode === 'za') return b.title.localeCompare(a.title);
       return 0;
     });
+
+  // ---- Master Full View ----
+  if (isViewingMaster && masterNote) {
+    return (
+      <div className={styles.page}>
+        <button onClick={() => setIsViewingMaster(false)} className={styles.backBtn}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to {activeSubject} Notes
+        </button>
+        <div className={styles.detailCard}>
+          <div className={styles.detailCardHeader}>
+            <h2 className={styles.detailTitle}>★ Master {activeSubject} Study Guide</h2>
+            <div className={styles.masterBadge}>{t('notes.aiSynthesized')}</div>
+          </div>
+          <div className={styles.detailMeta}>
+             <span className={styles.detailDate}>Generated with Gemini 1.5 Pro</span>
+          </div>
+          <div className={styles.detailBody}>
+            <StudyGuideRenderer content={masterNote} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ---- Detail view ----
   if (selectedNote) {
@@ -301,66 +325,20 @@ const NotesPage: React.FC<NotesPageProps> = ({
 
       {/* ── Pinned synthesized note (starred at top) ── */}
       {masterNote && activeSubject && (
-        <div className={styles.masterCard}>
-          <div className={styles.masterCardHeader} onClick={() => setMasterExpanded(v => !v)}>
-            <div className={styles.masterCardTitle}>
-              <span className={styles.masterStar}>★</span>
-              <span>Master {activeSubject} Study Guide</span>
-              <span className={styles.masterBadge}>{t('notes.aiSynthesized')}</span>
-            </div>
-            <div className={styles.masterHeaderActions}>
-              <button
-                className={styles.masterExpandBtn}
-                type="button"
-                title="Open fully"
-                onClick={e => { e.stopPropagation(); setMasterModalOpen(true); }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                {t('notes.openFully')}
-              </button>
-              <button className={styles.masterToggle} type="button">
-                {masterExpanded ? '▲' : '▼'}
-              </button>
+        <div className={styles.masterCardCompact} onClick={() => setIsViewingMaster(true)}>
+          <div className={styles.masterCardCompactContent}>
+            <span className={styles.masterStar}>★</span>
+            <div className={styles.masterCardCompactText}>
+              <span className={styles.masterCardCompactTitle}>Master {activeSubject} Study Guide</span>
+              <span className={styles.masterCardCompactSub}>Click to view the full synthesized guide</span>
             </div>
           </div>
-          {masterExpanded && (
-            <div className={styles.masterCardBody}>
-              <StudyGuideRenderer content={masterNote} />
-            </div>
-          )}
+          <button className={styles.viewGuideBtn}>
+            View Guide
+          </button>
         </div>
       )}
 
-      {/* ── Synthesized Note Full Modal ── */}
-      {masterModalOpen && masterNote && activeSubject && (
-        <div className={styles.modalOverlay} onClick={() => setMasterModalOpen(false)}>
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <div className={styles.masterCardTitle}>
-                <span className={styles.masterStar}>★</span>
-                <span>Master {activeSubject} Study Guide</span>
-                <span className={styles.masterBadge}>AI Synthesized</span>
-              </div>
-              <button 
-                className={styles.modalClose} 
-                onClick={(e) => { 
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setMasterModalOpen(false); 
-                }} 
-                title="Close"
-                type="button"
-                aria-label="Close modal"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-            <div className={styles.modalBody}>
-              <StudyGuideRenderer content={masterNote} />
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Notes grid ── */}
       {sortedFiltered.length > 0 ? (

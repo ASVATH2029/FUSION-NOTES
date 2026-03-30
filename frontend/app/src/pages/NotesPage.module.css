@@ -333,42 +333,78 @@
   overflow-y: auto; /* Allow scrolling for long generated text */
 }
 
-/* ── Master header action buttons ── */
-.masterHeaderActions {
+/* ── Compact Master Card (Action Bar) ── */
+.masterCardCompact {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.masterExpandBtn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(167, 139, 250, 0.15);
-  border: 1px solid rgba(167, 139, 250, 0.35);
-  border-radius: var(--radius-pill);
-  color: #c4b5fd;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 5px 12px;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(167, 139, 250, 0.05));
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-xl);
   cursor: pointer;
-  transition: all var(--duration-fast);
+  transition: all 0.2s var(--ease-out);
+  margin-bottom: 8px;
 }
 
-:global([data-theme='light']) .masterExpandBtn {
-  background: rgba(139, 92, 246, 0.1);
-  color: #7c3aed;
-  border-color: rgba(139, 92, 246, 0.2);
+.masterCardCompact:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(167, 139, 250, 0.1));
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
 }
 
-.masterExpandBtn:hover {
-  background: rgba(167, 139, 250, 0.3);
-  color: #fff;
+.masterCardCompactContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-:global([data-theme='light']) .masterExpandBtn:hover {
+.masterCardCompactText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.masterCardCompactTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #c4b5fd;
+}
+
+:global([data-theme='light']) .masterCardCompactTitle {
+  color: #6d28d9;
+}
+
+.masterCardCompactSub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.viewGuideBtn {
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+  transition: all 0.2s ease;
+}
+
+.viewGuideBtn:hover {
   background: #7c3aed;
-  color: #fff;
+  transform: scale(1.05);
+}
+
+/* ── Detail View Headers ── */
+.detailCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
 }
 
 /* ── Full-view Modal ── */
