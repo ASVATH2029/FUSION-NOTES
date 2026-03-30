@@ -5,7 +5,7 @@
 DEMONSTRATION LINK: https://drive.google.com/drive/folders/1hvLkbhq6KRPkW2lDH4f2UZ5izQP9CEzL?usp=sharing
 
 
-WEBSITE LINK:https://fusion-notes.netlify.app/
+WEBSITE LINK:https://fusion-notes.netlify.app/  perform a hard restart if in case a white screen appears(ctrl+f5)
 
 ### The AI-Powered Collaborative Study Suite
 

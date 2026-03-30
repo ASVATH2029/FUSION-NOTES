@@ -11,4 +11,14 @@ createRoot(document.getElementById('root')!).render(
 );
 
 
-// Service Worker registration removed to ensure fresh builds on Netlify
+// Service Worker Crusher: Unregister all service workers to fix the "White Screen" caching issue
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+      console.log('Unregistered broken service worker');
+    }
+    // Only reload if we actually found and unregistered something
+    if (registrations.length > 0) window.location.reload();
+  });
+}
