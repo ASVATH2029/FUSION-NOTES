@@ -3,10 +3,11 @@
 // In production (Netlify), it will use the VITE_API_URL environment variable
 
 const getApiBaseUrl = () => {
+  const url = import.meta.env.VITE_API_URL;
   // If we are in production and have the environment variable, use it
-  if (import.meta.env.PROD && import.meta.env.VITE_API_URL) {
+  if (import.meta.env.PROD && url) {
     // Ensure no trailing slash to avoid double slashes in fetch('/api/...')
-    return import.meta.env.VITE_API_URL.replace(/\/$/, '');
+    return url.replace(/\/$/, '');
   }
   // Fallback to empty string for local dev (which uses Vite proxy)
   return '';
