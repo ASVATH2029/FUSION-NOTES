@@ -36,23 +36,44 @@ export const AuthPage: React.FC<{ onLogin: (token: string, user: any) => void }>
     if (!loginEmail || !loginPassword) return;
     setIsLoading(true);
     setErrorMsg('');
+    
+    // Create a timeout controller
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword })
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
+
+      // Check if response is JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        // Probably hit a 404 or SPA fallback (HTML)
+        throw new Error("Server returned non-JSON response. Check if VITE_API_URL is correct.");
+      }
+
       const data = await res.json();
       if (res.ok && data.access_token) {
         onLogin(data.access_token, data.user);
       } else {
         setErrorMsg(data.detail || 'Authentication failed');
       }
-    } catch (err) {
-      console.error(err);
-      setErrorMsg('Could not connect to backend.');
+    } catch (err: any) {
+      console.error("Login Error:", err);
+      if (err.name === 'AbortError') {
+        setErrorMsg('Connection timed out. The server might be unreachable.');
+      } else {
+        setErrorMsg(err.message || 'Could not connect to backend.');
+      }
     } finally {
       setIsLoading(false);
+      clearTimeout(timeoutId);
     }
   };
 

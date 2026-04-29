@@ -66,17 +66,23 @@ const App: React.FC = () => {
       const res = await fetch(`${API_BASE_URL}/api/notes`, { headers });
       if (res.ok) {
         const rawData = await res.json();
-        const mappedNotes: Note[] = rawData.map((dbNote: any) => ({
-          id: dbNote.id,
-          title: dbNote.group_id.charAt(0).toUpperCase() + dbNote.group_id.slice(1) + ' Notes',
-          excerpt: dbNote.extracted_text.substring(0, 150) + '...',
-          fullText: dbNote.extracted_text,
-          tags: [dbNote.group_id.charAt(0).toUpperCase() + dbNote.group_id.slice(1)],
-          date: dbNote.created_at,
-          author: dbNote.user_id,
-          authorInitial: dbNote.user_id.charAt(0).toUpperCase(),
-          color: '#4ade80'
-        }));
+        const mappedNotes: Note[] = rawData.map((dbNote: any) => {
+          const groupId = dbNote.group_id || 'General';
+          const extractedText = dbNote.extracted_text || '';
+          const userId = dbNote.user_id || 'Unknown';
+
+          return {
+            id: dbNote.id,
+            title: groupId.charAt(0).toUpperCase() + groupId.slice(1) + ' Notes',
+            excerpt: extractedText.substring(0, 150).replace(/\n/g, ' ') + (extractedText.length > 150 ? '...' : ''),
+            fullText: extractedText,
+            tags: [groupId.charAt(0).toUpperCase() + groupId.slice(1)],
+            date: dbNote.created_at,
+            author: userId,
+            authorInitial: userId.charAt(0).toUpperCase(),
+            color: '#4ade80'
+          };
+        });
         setNotes(mappedNotes);
       }
     } catch (e) {
@@ -88,7 +94,10 @@ const App: React.FC = () => {
     if (isAuthenticated) {
       fetchNotes();
       fetchCollabs();
-      const id = setInterval(fetchCollabs, 30_000);
+      const id = setInterval(() => {
+        fetchNotes();
+        fetchCollabs();
+      }, 30_000);
       return () => clearInterval(id);
     }
   }, [isAuthenticated, fetchNotes, fetchCollabs]);
@@ -107,7 +116,11 @@ const App: React.FC = () => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('group_id', subject.toLowerCase());
-        await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', headers, body: formData });
+        const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', headers, body: formData });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ detail: 'Upload failed' }));
+          throw new Error(errData.detail || 'Upload failed');
+        }
       }
       await fetchNotes();
       await fetchCollabs(); // Refresh collabs to show activity

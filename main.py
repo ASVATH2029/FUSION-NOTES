@@ -16,7 +16,12 @@ app = FastAPI(title="Collaborative Notes API with Custom Auth SMTP")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://idyllic-uncompensated-ozie.ngrok-free.dev", 
+        "http://localhost:5173", 
+        "http://localhost:3000",
+        # Add your Netlify URL here (e.g. "https://your-app.netlify.app")
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -321,11 +326,15 @@ async def upload_note(
         
         prompt = "Extract all the handwritten text from this image exactly as written. If there are headings or bullet points, format them cleanly using Markdown. Only return the extracted text, no other commentary."
         
-        response = gemini_client.models.generate_content( # type: ignore
-            model='gemini-2.5-flash',
-            contents=[image_part, prompt]
-        )
-        extracted_text = response.text
+        try:
+            response = gemini_client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=[image_part, prompt]
+            )
+            extracted_text = response.text
+        except Exception as gemi_e:
+            print(f"Gemini OCR error: {str(gemi_e)}")
+            raise HTTPException(status_code=500, detail=f"Gemini OCR failed: {str(gemi_e)}")
         
         db_data = {
             "user_id": user_id, 
@@ -370,11 +379,15 @@ async def synthesize_notes(
         {combined_text}
         """
         
-        gemini_response = gemini_client.models.generate_content( # type: ignore
-            model='gemini-2.5-flash',
-            contents=prompt
-        )
-        master_note = gemini_response.text
+        try:
+            gemini_response = gemini_client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=prompt
+            )
+            master_note = gemini_response.text
+        except Exception as gemi_e:
+            print(f"Gemini Synthesis error: {str(gemi_e)}")
+            raise HTTPException(status_code=500, detail=f"Gemini Synthesis failed: {str(gemi_e)}")
         
         db_data = {
             "group_id": group_id,
